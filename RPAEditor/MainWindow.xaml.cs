@@ -43,6 +43,7 @@ public partial class MainWindow : Window
         btnAddFileExists.Click += BtnAddFileExists_Click;
         btnAddExcelOpen.Click += BtnAddExcelOpen_Click;
         btnAddExcelCell.Click += BtnAddExcelCell_Click;
+        btnAddExcelSheet.Click += BtnAddExcelSheet_Click;
         btnAddExcelSaveClose.Click += BtnAddExcelSaveClose_Click;
 
         btnEditAction.Click += BtnEditAction_Click;
@@ -270,6 +271,20 @@ public partial class MainWindow : Window
         }
     }
 
+    private void BtnAddExcelSheet_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Dialogs.ExcelSheetDialog(this)
+        {
+            Owner = this
+        };
+        if (dialog.ShowDialog() == true)
+        {
+            _scriptEngine.AddAction(dialog.Action!);
+            UpdateActionList();
+            txtStatus.Text = "Excelシート操作アクションを追加しました";
+        }
+    }
+
     private void BtnAddExcelSaveClose_Click(object sender, RoutedEventArgs e)
     {
         var dialog = new Dialogs.ExcelSaveCloseDialog(this)
@@ -404,6 +419,36 @@ public partial class MainWindow : Window
                 var excelCloseDialog = new Dialogs.ExcelSaveCloseDialog(this, excelCloseAction) { Owner = this };
                 result = excelCloseDialog.ShowDialog();
                 newAction = excelCloseDialog.Action;
+                break;
+
+            case ExcelAddSheetAction excelAddSheetAction:
+                var excelAddSheetDialog = new Dialogs.ExcelSheetDialog(this, excelAddSheetAction) { Owner = this };
+                result = excelAddSheetDialog.ShowDialog();
+                newAction = excelAddSheetDialog.Action;
+                break;
+
+            case ExcelDeleteSheetAction excelDeleteSheetAction:
+                var excelDeleteSheetDialog = new Dialogs.ExcelSheetDialog(this, excelDeleteSheetAction) { Owner = this };
+                result = excelDeleteSheetDialog.ShowDialog();
+                newAction = excelDeleteSheetDialog.Action;
+                break;
+
+            case ExcelRenameSheetAction excelRenameSheetAction:
+                var excelRenameSheetDialog = new Dialogs.ExcelSheetDialog(this, excelRenameSheetAction) { Owner = this };
+                result = excelRenameSheetDialog.ShowDialog();
+                newAction = excelRenameSheetDialog.Action;
+                break;
+
+            case ExcelCopySheetAction excelCopySheetAction:
+                var excelCopySheetDialog = new Dialogs.ExcelSheetDialog(this, excelCopySheetAction) { Owner = this };
+                result = excelCopySheetDialog.ShowDialog();
+                newAction = excelCopySheetDialog.Action;
+                break;
+
+            case ExcelSheetExistsAction excelSheetExistsAction:
+                var excelSheetExistsDialog = new Dialogs.ExcelSheetDialog(this, excelSheetExistsAction) { Owner = this };
+                result = excelSheetExistsDialog.ShowDialog();
+                newAction = excelSheetExistsDialog.Action;
                 break;
 
             default:
