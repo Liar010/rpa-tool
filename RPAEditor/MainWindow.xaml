@@ -69,10 +69,12 @@
                             </StackPanel>
                         </Expander>
 
-                        <!-- Excel操作カテゴリ（将来用） -->
+                        <!-- Excel操作カテゴリ -->
                         <Expander Header="📊 Excel操作" IsExpanded="False" Margin="0,5">
                             <StackPanel Margin="5,5,0,5">
-                                <TextBlock Text="（未実装）" Foreground="Gray" Margin="5" FontStyle="Italic"/>
+                                <Button x:Name="btnAddExcelOpen" Content="ファイルを開く" Margin="0,3" Padding="5" Height="32"/>
+                                <Button x:Name="btnAddExcelCell" Content="セル操作" Margin="0,3" Padding="5" Height="32"/>
+                                <Button x:Name="btnAddExcelSaveClose" Content="保存/閉じる" Margin="0,3" Padding="5" Height="32"/>
                             </StackPanel>
                         </Expander>
 

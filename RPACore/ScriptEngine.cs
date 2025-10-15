@@ -1,5 +1,6 @@
 using RPACore.Actions;
 using System.Text.Json;
+using ClosedXML.Excel;
 
 namespace RPACore;
 
@@ -20,9 +21,22 @@ public class ExecutionContext
     /// <summary>アクション番号（1始まり）→プロセス情報のマッピング</summary>
     public Dictionary<int, LaunchedProcessInfo> LaunchedProcesses { get; } = new();
 
+    /// <summary>開いているExcelワークブック（複数ファイル対応）</summary>
+    public Dictionary<string, XLWorkbook> OpenWorkbooks { get; } = new();
+
+    /// <summary>ScriptEngineへの参照（アクションリストにアクセスするため）</summary>
+    public ScriptEngine? ScriptEngine { get; set; }
+
     public void Clear()
     {
         LaunchedProcesses.Clear();
+
+        // 開いているワークブックをすべてクローズ
+        foreach (var workbook in OpenWorkbooks.Values)
+        {
+            workbook?.Dispose();
+        }
+        OpenWorkbooks.Clear();
     }
 }
 
@@ -72,6 +86,7 @@ public class ScriptEngine
         IsRunning = true;
         CurrentActionIndex = 0;
         Context.Clear(); // 実行コンテキストをクリア
+        Context.ScriptEngine = this; // ScriptEngineへの参照を設定
         bool allSuccess = true;
 
         try
@@ -234,6 +249,11 @@ public class ScriptEngine
                 nameof(FileRenameAction) => JsonSerializer.Deserialize<FileRenameAction>(actionData.Data),
                 nameof(FolderCreateAction) => JsonSerializer.Deserialize<FolderCreateAction>(actionData.Data),
                 nameof(FileExistsAction) => JsonSerializer.Deserialize<FileExistsAction>(actionData.Data),
+                nameof(ExcelOpenAction) => JsonSerializer.Deserialize<ExcelOpenAction>(actionData.Data),
+                nameof(ExcelReadCellAction) => JsonSerializer.Deserialize<ExcelReadCellAction>(actionData.Data),
+                nameof(ExcelWriteCellAction) => JsonSerializer.Deserialize<ExcelWriteCellAction>(actionData.Data),
+                nameof(ExcelSaveAction) => JsonSerializer.Deserialize<ExcelSaveAction>(actionData.Data),
+                nameof(ExcelCloseAction) => JsonSerializer.Deserialize<ExcelCloseAction>(actionData.Data),
                 _ => throw new InvalidOperationException($"未知のアクションタイプ: {actionData.Type}")
             };
 

@@ -41,6 +41,9 @@ public partial class MainWindow : Window
         btnAddFileRename.Click += BtnAddFileRename_Click;
         btnAddFolderCreate.Click += BtnAddFolderCreate_Click;
         btnAddFileExists.Click += BtnAddFileExists_Click;
+        btnAddExcelOpen.Click += BtnAddExcelOpen_Click;
+        btnAddExcelCell.Click += BtnAddExcelCell_Click;
+        btnAddExcelSaveClose.Click += BtnAddExcelSaveClose_Click;
 
         btnEditAction.Click += BtnEditAction_Click;
         btnDeleteAction.Click += BtnDeleteAction_Click;
@@ -60,6 +63,16 @@ public partial class MainWindow : Window
 
         UpdateActionList();
     }
+
+    /// <summary>
+    /// アクション数を取得
+    /// </summary>
+    public int GetActionCount() => _scriptEngine.Actions.Count;
+
+    /// <summary>
+    /// 指定インデックスのアクションを取得
+    /// </summary>
+    public IAction GetActionAt(int index) => _scriptEngine.Actions[index];
 
     private void BtnAddMouseClick_Click(object sender, RoutedEventArgs e)
     {
@@ -229,6 +242,48 @@ public partial class MainWindow : Window
         }
     }
 
+    private void BtnAddExcelOpen_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Dialogs.ExcelOpenDialog
+        {
+            Owner = this
+        };
+        if (dialog.ShowDialog() == true)
+        {
+            _scriptEngine.AddAction(dialog.Action!);
+            UpdateActionList();
+            txtStatus.Text = "Excelファイルを開くアクションを追加しました";
+        }
+    }
+
+    private void BtnAddExcelCell_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Dialogs.ExcelCellDialog(this)
+        {
+            Owner = this
+        };
+        if (dialog.ShowDialog() == true)
+        {
+            _scriptEngine.AddAction(dialog.Action!);
+            UpdateActionList();
+            txtStatus.Text = "Excelセル操作アクションを追加しました";
+        }
+    }
+
+    private void BtnAddExcelSaveClose_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Dialogs.ExcelSaveCloseDialog(this)
+        {
+            Owner = this
+        };
+        if (dialog.ShowDialog() == true)
+        {
+            _scriptEngine.AddAction(dialog.Action!);
+            UpdateActionList();
+            txtStatus.Text = "Excel保存/閉じるアクションを追加しました";
+        }
+    }
+
     private void BtnEditAction_Click(object sender, RoutedEventArgs e)
     {
         if (lstActions.SelectedIndex < 0)
@@ -319,6 +374,36 @@ public partial class MainWindow : Window
                 var fileExistsDialog = new Dialogs.FileExistsDialog(fileExistsAction) { Owner = this };
                 result = fileExistsDialog.ShowDialog();
                 newAction = fileExistsDialog.Action;
+                break;
+
+            case ExcelOpenAction excelOpenAction:
+                var excelOpenDialog = new Dialogs.ExcelOpenDialog(excelOpenAction) { Owner = this };
+                result = excelOpenDialog.ShowDialog();
+                newAction = excelOpenDialog.Action;
+                break;
+
+            case ExcelReadCellAction excelReadCellAction:
+                var excelReadCellDialog = new Dialogs.ExcelCellDialog(this, excelReadCellAction) { Owner = this };
+                result = excelReadCellDialog.ShowDialog();
+                newAction = excelReadCellDialog.Action;
+                break;
+
+            case ExcelWriteCellAction excelWriteCellAction:
+                var excelWriteCellDialog = new Dialogs.ExcelCellDialog(this, excelWriteCellAction) { Owner = this };
+                result = excelWriteCellDialog.ShowDialog();
+                newAction = excelWriteCellDialog.Action;
+                break;
+
+            case ExcelSaveAction excelSaveAction:
+                var excelSaveDialog = new Dialogs.ExcelSaveCloseDialog(this, excelSaveAction) { Owner = this };
+                result = excelSaveDialog.ShowDialog();
+                newAction = excelSaveDialog.Action;
+                break;
+
+            case ExcelCloseAction excelCloseAction:
+                var excelCloseDialog = new Dialogs.ExcelSaveCloseDialog(this, excelCloseAction) { Owner = this };
+                result = excelCloseDialog.ShowDialog();
+                newAction = excelCloseDialog.Action;
                 break;
 
             default:
