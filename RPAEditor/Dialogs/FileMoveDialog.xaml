@@ -1,0 +1,55 @@
+<Window x:Class="RPAEditor.Dialogs.FileMoveDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ファイル移動" Height="280" Width="600"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F5F5">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 移動元ファイル -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+            <TextBlock Text="移動元ファイル:" FontWeight="Bold" Margin="0,0,0,5"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="txtSourcePath" Grid.Column="0" Padding="5" VerticalContentAlignment="Center"/>
+                <Button x:Name="btnBrowseSource" Grid.Column="1" Content="参照..." Width="80" Margin="5,0,0,0" Click="BtnBrowseSource_Click"/>
+            </Grid>
+        </StackPanel>
+
+        <!-- 移動先 -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,15">
+            <TextBlock Text="移動先 (ファイルまたはフォルダ):" FontWeight="Bold" Margin="0,0,0,5"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="txtDestinationPath" Grid.Column="0" Padding="5" VerticalContentAlignment="Center"/>
+                <Button x:Name="btnBrowseDest" Grid.Column="1" Content="参照..." Width="80" Margin="5,0,0,0" Click="BtnBrowseDest_Click"/>
+            </Grid>
+            <TextBlock Text="※ フォルダを指定した場合、元のファイル名で移動されます"
+                       FontSize="10" Foreground="Gray" Margin="0,3,0,0"/>
+        </StackPanel>
+
+        <!-- オプション -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,15">
+            <CheckBox x:Name="chkOverwrite" Content="既存ファイルを上書きする" IsChecked="False"/>
+        </StackPanel>
+
+        <!-- ボタン -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="OK" Width="100" Height="32" Margin="0,0,10,0" Click="BtnOk_Click" IsDefault="True"/>
+            <Button Content="キャンセル" Width="100" Height="32" Click="BtnCancel_Click" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>
