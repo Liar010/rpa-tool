@@ -265,6 +265,7 @@ public class ScriptEngine
                 nameof(ExcelSheetExistsAction) => JsonSerializer.Deserialize<ExcelSheetExistsAction>(actionData.Data),
                 nameof(ExcelSaveAction) => JsonSerializer.Deserialize<ExcelSaveAction>(actionData.Data),
                 nameof(ExcelCloseAction) => JsonSerializer.Deserialize<ExcelCloseAction>(actionData.Data),
+                nameof(WebhookAction) => JsonSerializer.Deserialize<WebhookAction>(actionData.Data),
                 _ => throw new InvalidOperationException($"未知のアクションタイプ: {actionData.Type}")
             };
 
