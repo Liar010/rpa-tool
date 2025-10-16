@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
@@ -7,20 +8,23 @@ namespace RPAEditor.Dialogs;
 
 public partial class ExcelSheetDialog : Window
 {
-    private readonly MainWindow? _mainWindow;
+    private readonly Func<int>? _getActionCount;
+    private readonly Func<int, IAction>? _getActionAt;
     public IAction? Action { get; private set; }
 
     // デフォルトコンストラクタ（新規作成用）
-    public ExcelSheetDialog(MainWindow mainWindow)
+    public ExcelSheetDialog(Func<int> getActionCount, Func<int, IAction> getActionAt)
     {
         InitializeComponent();
-        _mainWindow = mainWindow;
+        _getActionCount = getActionCount;
+        _getActionAt = getActionAt;
         PopulateOpenActions();
         UpdateFieldsVisibility();
     }
 
     // 編集用コンストラクタ（各アクション型に対応）
-    public ExcelSheetDialog(MainWindow mainWindow, IAction existingAction) : this(mainWindow)
+    public ExcelSheetDialog(Func<int> getActionCount, Func<int, IAction> getActionAt, IAction existingAction)
+        : this(getActionCount, getActionAt)
     {
         switch (existingAction)
         {
@@ -87,12 +91,12 @@ public partial class ExcelSheetDialog : Window
 
     private void PopulateOpenActions()
     {
-        if (_mainWindow == null) return;
+        if (_getActionCount == null || _getActionAt == null) return;
 
         cmbOpenActions.Items.Clear();
-        for (int i = 0; i < _mainWindow.GetActionCount(); i++)
+        for (int i = 0; i < _getActionCount(); i++)
         {
-            var action = _mainWindow.GetActionAt(i);
+            var action = _getActionAt(i);
             if (action is ExcelOpenAction)
             {
                 cmbOpenActions.Items.Add(new { Index = i + 1, Display = $"#{i + 1}: Excelファイルを開く" });

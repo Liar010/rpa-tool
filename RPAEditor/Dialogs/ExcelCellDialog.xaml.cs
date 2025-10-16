@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Win32;
 using RPACore.Actions;
 using System.Windows;
@@ -7,20 +8,23 @@ namespace RPAEditor.Dialogs;
 public partial class ExcelCellDialog : Window
 {
     public IAction? Action { get; private set; }
-    private readonly MainWindow? _mainWindow;
+    private readonly Func<int>? _getActionCount;
+    private readonly Func<int, IAction>? _getActionAt;
 
     public ExcelCellDialog()
     {
         InitializeComponent();
     }
 
-    public ExcelCellDialog(MainWindow mainWindow) : this()
+    public ExcelCellDialog(Func<int> getActionCount, Func<int, IAction> getActionAt) : this()
     {
-        _mainWindow = mainWindow;
+        _getActionCount = getActionCount;
+        _getActionAt = getActionAt;
         PopulateOpenActions();
     }
 
-    public ExcelCellDialog(MainWindow mainWindow, ExcelReadCellAction action) : this(mainWindow)
+    public ExcelCellDialog(Func<int> getActionCount, Func<int, IAction> getActionAt, ExcelReadCellAction action)
+        : this(getActionCount, getActionAt)
     {
         rbRead.IsChecked = true;
 
@@ -40,7 +44,8 @@ public partial class ExcelCellDialog : Window
         UpdateReferenceMethodVisibility();
     }
 
-    public ExcelCellDialog(MainWindow mainWindow, ExcelWriteCellAction action) : this(mainWindow)
+    public ExcelCellDialog(Func<int> getActionCount, Func<int, IAction> getActionAt, ExcelWriteCellAction action)
+        : this(getActionCount, getActionAt)
     {
         rbWrite.IsChecked = true;
 
@@ -77,12 +82,12 @@ public partial class ExcelCellDialog : Window
 
     private void PopulateOpenActions()
     {
-        if (_mainWindow == null) return;
+        if (_getActionCount == null || _getActionAt == null) return;
 
         cmbOpenActions.Items.Clear();
-        for (int i = 0; i < _mainWindow.GetActionCount(); i++)
+        for (int i = 0; i < _getActionCount(); i++)
         {
-            var action = _mainWindow.GetActionAt(i);
+            var action = _getActionAt(i);
             if (action is ExcelOpenAction)
             {
                 cmbOpenActions.Items.Add(new { Index = i + 1, Display = $"#{i + 1}: Excelファイルを開く" });
@@ -100,12 +105,12 @@ public partial class ExcelCellDialog : Window
 
     private void PopulateReadActions()
     {
-        if (_mainWindow == null) return;
+        if (_getActionCount == null || _getActionAt == null) return;
 
         cmbReadActions.Items.Clear();
-        for (int i = 0; i < _mainWindow.GetActionCount(); i++)
+        for (int i = 0; i < _getActionCount(); i++)
         {
-            var action = _mainWindow.GetActionAt(i);
+            var action = _getActionAt(i);
             if (action is ExcelReadCellAction)
             {
                 cmbReadActions.Items.Add(new { Index = i + 1, Display = $"#{i + 1}: セル値を読み取る" });
