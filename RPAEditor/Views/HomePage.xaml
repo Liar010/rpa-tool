@@ -1,0 +1,121 @@
+<UserControl x:Class="RPAEditor.Views.HomePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="900"
+             Background="White">
+    <Grid Margin="40">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- タイトル -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,30">
+            <TextBlock Text="RPAツール" FontSize="32" FontWeight="Bold" Foreground="#333333"/>
+            <TextBlock Text="Automate Your Workflow" FontSize="14" Foreground="#666666" Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <!-- 新規作成ボタン -->
+        <Button x:Name="btnNewScript" Grid.Row="1"
+                Content="新しいスクリプトを作成"
+                Height="50"
+                FontSize="16"
+                FontWeight="SemiBold"
+                Background="#0078D4"
+                Foreground="White"
+                BorderThickness="0"
+                Cursor="Hand"
+                Margin="0,0,0,20">
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Background" Value="#0078D4"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#005A9E"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+
+        <!-- 最近のスクリプト見出し -->
+        <TextBlock Grid.Row="2"
+                   Text="最近のスクリプト"
+                   FontSize="18"
+                   FontWeight="SemiBold"
+                   Foreground="#333333"
+                   Margin="0,10,0,15"/>
+
+        <!-- スクリプト一覧 -->
+        <Border Grid.Row="3"
+                BorderBrush="#DDDDDD"
+                BorderThickness="1"
+                CornerRadius="4"
+                Background="White">
+            <Grid>
+                <ListBox x:Name="lstRecentScripts"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="#EEEEEE"
+                                    BorderThickness="0,0,0,1"
+                                    Padding="15,12"
+                                    Background="Transparent"
+                                    Cursor="Hand">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- アイコン -->
+                                    <TextBlock Grid.Column="0"
+                                               Text="📄"
+                                               FontSize="20"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,15,0"/>
+
+                                    <!-- ファイル情報 -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding DisplayName}"
+                                                   FontSize="14"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#333333"/>
+                                        <TextBlock Text="{Binding DisplayPath}"
+                                                   FontSize="12"
+                                                   Foreground="#666666"
+                                                   Margin="0,2,0,0"/>
+                                    </StackPanel>
+
+                                    <!-- 更新日時 -->
+                                    <TextBlock Grid.Column="2"
+                                               Text="{Binding DisplayTime}"
+                                               FontSize="12"
+                                               Foreground="#999999"
+                                               VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!-- スクリプトがない場合のメッセージ -->
+                <TextBlock x:Name="txtNoScripts"
+                           Text="保存されたスクリプトがありません"
+                           FontSize="14"
+                           Foreground="#999999"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Visibility="Collapsed"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
