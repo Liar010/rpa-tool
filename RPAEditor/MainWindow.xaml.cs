@@ -22,6 +22,7 @@ public class ActionListItem
 public partial class MainWindow : Window
 {
     private readonly ScriptEngine _scriptEngine;
+    private LogViewerWindow? _logViewerWindow;
 
     public MainWindow()
     {
@@ -56,6 +57,7 @@ public partial class MainWindow : Window
         btnNewScript.Click += BtnNewScript_Click;
         btnSaveScript.Click += BtnSaveScript_Click;
         btnOpenScript.Click += BtnOpenScript_Click;
+        btnLog.Click += BtnLog_Click;
 
         lstActions.SelectionChanged += LstActions_SelectionChanged;
 
@@ -530,6 +532,24 @@ public partial class MainWindow : Window
     {
         // TODO: 実行停止機能を実装
         MessageBox.Show("停止機能は実装中です", "停止", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private void BtnLog_Click(object sender, RoutedEventArgs e)
+    {
+        // ログビューアーが既に開いている場合は前面に表示
+        if (_logViewerWindow != null && _logViewerWindow.IsLoaded)
+        {
+            _logViewerWindow.Activate();
+        }
+        else
+        {
+            // 新しくログビューアーを開く
+            _logViewerWindow = new LogViewerWindow
+            {
+                Owner = this
+            };
+            _logViewerWindow.Show();
+        }
     }
 
     private void BtnNewScript_Click(object sender, RoutedEventArgs e)

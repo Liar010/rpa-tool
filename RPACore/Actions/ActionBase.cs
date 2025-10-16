@@ -49,19 +49,35 @@ public abstract class ActionBase : IAction
     }
 
     /// <summary>
-    /// ログ出力用（将来的にログ機能を追加）
+    /// DEBUGレベルログ出力
     /// </summary>
-    protected void LogInfo(string message)
+    protected void LogDebug(string message)
     {
-        Console.WriteLine($"[INFO] {Name}: {message}");
+        Logger.Instance.Debug(Name, message);
     }
 
     /// <summary>
-    /// エラーログ出力
+    /// INFOレベルログ出力
+    /// </summary>
+    protected void LogInfo(string message)
+    {
+        Logger.Instance.Info(Name, message);
+    }
+
+    /// <summary>
+    /// WARNレベルログ出力
+    /// </summary>
+    protected void LogWarn(string message)
+    {
+        Logger.Instance.Warn(Name, message);
+    }
+
+    /// <summary>
+    /// ERRORレベルログ出力
     /// </summary>
     protected void LogError(string message)
     {
         LastError = message;
-        Console.WriteLine($"[ERROR] {Name}: {message}");
+        Logger.Instance.Error(Name, message);
     }
 }

@@ -23,6 +23,8 @@
             <Separator/>
             <Button x:Name="btnRunScript" Content="▶ 実行" Width="80" Margin="2" Background="#4CAF50" Foreground="White"/>
             <Button x:Name="btnStopScript" Content="■ 停止" Width="80" Margin="2" Background="#F44336" Foreground="White" IsEnabled="False"/>
+            <Separator/>
+            <Button x:Name="btnLog" Content="📋 ログ" Width="80" Margin="2"/>
         </ToolBar>
 
         <!-- メインコンテンツ -->
