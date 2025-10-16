@@ -15,10 +15,36 @@
         </Grid.RowDefinitions>
 
         <!-- タイトル -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,30">
-            <TextBlock Text="RPAツール" FontSize="32" FontWeight="Bold" Foreground="#333333"/>
-            <TextBlock Text="Automate Your Workflow" FontSize="14" Foreground="#666666" Margin="0,5,0,0"/>
-        </StackPanel>
+        <Grid Grid.Row="0" Margin="0,0,0,30">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="RPAツール" FontSize="32" FontWeight="Bold" Foreground="#333333"/>
+                <TextBlock Text="Automate Your Workflow" FontSize="14" Foreground="#666666" Margin="0,5,0,0"/>
+            </StackPanel>
+
+            <!-- 設定ボタン -->
+            <Button x:Name="btnSettings"
+                    Content="⚙ 設定"
+                    Width="100"
+                    Height="35"
+                    FontSize="14"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Background="#F5F5F5"
+                    BorderBrush="#CCCCCC"
+                    BorderThickness="1"
+                    Cursor="Hand">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#F5F5F5"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E0E0E0"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </Grid>
 
         <!-- 新規作成ボタン -->
         <Button x:Name="btnNewScript" Grid.Row="1"

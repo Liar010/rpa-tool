@@ -12,6 +12,7 @@ public partial class HomePage : UserControl
 {
     public event EventHandler? NewScriptRequested;
     public event EventHandler<string>? ScriptFileSelected;
+    public event EventHandler? SettingsRequested;
 
     private readonly RecentFilesManager _recentFilesManager;
 
@@ -22,6 +23,7 @@ public partial class HomePage : UserControl
         _recentFilesManager = new RecentFilesManager();
 
         btnNewScript.Click += BtnNewScript_Click;
+        btnSettings.Click += BtnSettings_Click;
         lstRecentScripts.MouseDoubleClick += LstRecentScripts_MouseDoubleClick;
 
         LoadRecentScripts();
@@ -30,6 +32,11 @@ public partial class HomePage : UserControl
     private void BtnNewScript_Click(object sender, RoutedEventArgs e)
     {
         NewScriptRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void BtnSettings_Click(object sender, RoutedEventArgs e)
+    {
+        SettingsRequested?.Invoke(this, EventArgs.Empty);
     }
 
     private void LstRecentScripts_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
