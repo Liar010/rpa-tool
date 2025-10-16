@@ -559,9 +559,12 @@ public partial class EditorPage : UserControl
         {
             try
             {
-                await _scriptEngine.SaveToFileAsync(dialog.FileName);
-                _recentFilesManager.AddFile(dialog.FileName);
-                txtStatus.Text = $"スクリプトを保存しました: {System.IO.Path.GetFileName(dialog.FileName)}";
+                // テンプレート変数を展開
+                var expandedFileName = FileNameTemplateHelper.Expand(dialog.FileName);
+
+                await _scriptEngine.SaveToFileAsync(expandedFileName);
+                _recentFilesManager.AddFile(expandedFileName);
+                txtStatus.Text = $"スクリプトを保存しました: {System.IO.Path.GetFileName(expandedFileName)}";
             }
             catch (Exception ex)
             {

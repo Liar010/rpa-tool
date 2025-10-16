@@ -1,5 +1,6 @@
 using RPACore.Actions;
 using System.Text.Json;
+using System.Reflection;
 using ClosedXML.Excel;
 
 namespace RPACore;
@@ -104,6 +105,9 @@ public class ScriptEngine
                     actionBase.Context = Context;
                     actionBase.ActionIndex = i + 1; // 1始まり
                 }
+
+                // テンプレート変数を展開
+                ExpandTemplateVariables(action);
 
                 Console.WriteLine($"\n[{i + 1}/{Actions.Count}] {action.Name}");
 
@@ -271,6 +275,43 @@ public class ScriptEngine
         }
 
         Console.WriteLine($"スクリプトを読み込みました: {Actions.Count} アクション");
+    }
+
+    /// <summary>
+    /// アクションの全ての文字列プロパティでテンプレート変数を展開
+    /// </summary>
+    private void ExpandTemplateVariables(IAction action)
+    {
+        // リフレクションで全てのpublicプロパティを取得
+        var properties = action.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+        foreach (var property in properties)
+        {
+            // 文字列型かつ読み書き可能なプロパティのみ処理
+            if (property.PropertyType == typeof(string) && property.CanRead && property.CanWrite)
+            {
+                try
+                {
+                    var value = property.GetValue(action) as string;
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        var expandedValue = TemplateExpander.Expand(value);
+
+                        // 値が変更された場合のみ設定
+                        if (expandedValue != value)
+                        {
+                            property.SetValue(action, expandedValue);
+                            Console.WriteLine($"  テンプレート展開: {property.Name} = {expandedValue}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // プロパティのアクセスに失敗しても続行
+                    Console.WriteLine($"  警告: {property.Name}のテンプレート展開に失敗しました: {ex.Message}");
+                }
+            }
+        }
     }
 }
 
