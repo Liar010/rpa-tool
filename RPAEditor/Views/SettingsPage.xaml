@@ -1,0 +1,152 @@
+<UserControl x:Class="RPAEditor.Views.SettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="900"
+             Background="White">
+    <Grid Margin="40">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ヘッダー -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,30">
+            <Button x:Name="btnBack" Content="← ホーム" Width="100" HorizontalAlignment="Left"
+                    Height="35" FontSize="14" Margin="0,0,0,15"/>
+            <TextBlock Text="設定" FontSize="32" FontWeight="Bold" Foreground="#333333"/>
+            <TextBlock Text="テンプレート変数の管理" FontSize="14" Foreground="#666666" Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <!-- 説明文 -->
+        <Border Grid.Row="1" Background="#F5F5F5" Padding="15" CornerRadius="4" Margin="0,0,0,20">
+            <StackPanel>
+                <TextBlock FontSize="13" Foreground="#333333" TextWrapping="Wrap">
+                    <Run FontWeight="SemiBold">テンプレート変数について：</Run>
+                    <LineBreak/>
+                    ファイル保存時に %date% や %time% などの変数を使用すると、自動的に展開されます。
+                    <LineBreak/>
+                    例: "report_%date%.rpa" → "report_2025-10-16.rpa"
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- タブコントロール -->
+        <TabControl Grid.Row="2" BorderBrush="#DDDDDD" Background="White">
+            <!-- 組み込み変数タブ -->
+            <TabItem Header="組み込み変数" FontSize="14">
+                <Grid Margin="20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="以下の変数が標準で使用可能です"
+                               FontSize="13" Foreground="#666666" Margin="0,0,0,10"/>
+
+                    <DataGrid Grid.Row="1" x:Name="dgBuiltInVariables"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              BorderBrush="#DDDDDD"
+                              BorderThickness="1"
+                              RowBackground="White"
+                              AlternatingRowBackground="#F9F9F9">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="変数名" Binding="{Binding Name}" Width="150" FontFamily="Consolas"/>
+                            <DataGridTextColumn Header="説明" Binding="{Binding Description}" Width="250"/>
+                            <DataGridTextColumn Header="例" Binding="{Binding Example}" Width="*" FontFamily="Consolas"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- カスタム変数タブ -->
+            <TabItem Header="カスタム変数" FontSize="14">
+                <Grid Margin="20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="独自の変数を定義できます（%変数名% で使用）"
+                               FontSize="13" Foreground="#666666" Margin="0,0,0,10"/>
+
+                    <!-- カスタム変数リスト -->
+                    <Border Grid.Row="1" BorderBrush="#DDDDDD" BorderThickness="1" Background="White" Margin="0,0,0,15">
+                        <Grid>
+                            <DataGrid x:Name="dgCustomVariables"
+                                      AutoGenerateColumns="False"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="Horizontal"
+                                      RowBackground="White"
+                                      AlternatingRowBackground="#F9F9F9"
+                                      SelectionMode="Single">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="変数名" Binding="{Binding Key}" Width="200" FontFamily="Consolas" IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="値" Binding="{Binding Value}" Width="*" FontFamily="Consolas"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <!-- 変数がない場合のメッセージ -->
+                            <TextBlock x:Name="txtNoCustomVariables"
+                                       Text="カスタム変数が登録されていません"
+                                       FontSize="14"
+                                       Foreground="#999999"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Visibility="Collapsed"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- 操作ボタン -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left">
+                        <Button x:Name="btnAddVariable" Content="追加" Width="100" Height="35"
+                                Margin="0,0,10,0" FontSize="14"/>
+                        <Button x:Name="btnEditVariable" Content="編集" Width="100" Height="35"
+                                Margin="0,0,10,0" FontSize="14"/>
+                        <Button x:Name="btnDeleteVariable" Content="削除" Width="100" Height="35"
+                                FontSize="14"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- プレビュータブ -->
+            <TabItem Header="プレビュー" FontSize="14">
+                <Grid Margin="20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="テンプレート文字列の展開結果をプレビューできます"
+                               FontSize="13" Foreground="#666666" Margin="0,0,0,15"/>
+
+                    <TextBlock Grid.Row="1" Text="テンプレート入力:" FontSize="13" Margin="0,0,0,5"/>
+                    <TextBox Grid.Row="2" x:Name="txtPreviewInput"
+                             Height="35" FontSize="14" FontFamily="Consolas"
+                             VerticalContentAlignment="Center"
+                             Margin="0,0,0,15"/>
+
+                    <StackPanel Grid.Row="3">
+                        <TextBlock Text="展開結果:" FontSize="13" Margin="0,0,0,5"/>
+                        <Border Background="#F5F5F5" Padding="10" CornerRadius="4" BorderBrush="#DDDDDD" BorderThickness="1">
+                            <TextBlock x:Name="txtPreviewOutput"
+                                       FontSize="14" FontFamily="Consolas"
+                                       Foreground="#0078D4"
+                                       Text="（入力してください）"
+                                       TextWrapping="Wrap"/>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>
