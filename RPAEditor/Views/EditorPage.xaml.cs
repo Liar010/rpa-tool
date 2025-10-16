@@ -45,6 +45,7 @@ public partial class EditorPage : UserControl
         btnAddExcelRange.Click += BtnAddExcelRange_Click;
         btnAddExcelSheet.Click += BtnAddExcelSheet_Click;
         btnAddExcelSaveClose.Click += BtnAddExcelSaveClose_Click;
+        btnAddWebhook.Click += BtnAddWebhook_Click;
 
         btnEditAction.Click += BtnEditAction_Click;
         btnDeleteAction.Click += BtnDeleteAction_Click;
@@ -275,6 +276,17 @@ public partial class EditorPage : UserControl
         }
     }
 
+    private void BtnAddWebhook_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Dialogs.WebhookActionDialog { Owner = _ownerWindow };
+        if (dialog.ShowDialog() == true)
+        {
+            _scriptEngine.AddAction(dialog.Action);
+            UpdateActionList();
+            txtStatus.Text = "Webhook通知アクションを追加しました";
+        }
+    }
+
     private void BtnEditAction_Click(object sender, RoutedEventArgs e)
     {
         if (lstActions.SelectedIndex < 0)
@@ -436,6 +448,12 @@ public partial class EditorPage : UserControl
                 var excelWriteRangeDialog = new Dialogs.ExcelRangeDialog(excelWriteRangeAction, _scriptEngine) { Owner = _ownerWindow };
                 result = excelWriteRangeDialog.ShowDialog();
                 newAction = excelWriteRangeDialog.Action;
+                break;
+
+            case WebhookAction webhookAction:
+                var webhookDialog = new Dialogs.WebhookActionDialog(webhookAction) { Owner = _ownerWindow };
+                result = webhookDialog.ShowDialog();
+                newAction = webhookDialog.Action;
                 break;
 
             default:

@@ -1,0 +1,78 @@
+<Window x:Class="RPAEditor.Dialogs.WebhookActionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Webhook通知" Height="550" Width="600"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- サービス種類 -->
+        <TextBlock Grid.Row="0" Text="サービス種類:" Margin="0,0,0,5"/>
+        <ComboBox Grid.Row="1" x:Name="cmbServiceType" Margin="0,0,0,15" Height="30">
+            <ComboBoxItem Content="Discord" Tag="Discord"/>
+            <ComboBoxItem Content="Slack" Tag="Slack"/>
+            <ComboBoxItem Content="Microsoft Teams" Tag="Teams"/>
+            <ComboBoxItem Content="Google Chat" Tag="GoogleChat"/>
+            <ComboBoxItem Content="カスタム" Tag="Custom"/>
+        </ComboBox>
+
+        <!-- Webhook URL / トークン -->
+        <TextBlock Grid.Row="2" x:Name="txtUrlLabel" Text="Webhook URL:" Margin="0,0,0,5"/>
+        <Grid Grid.Row="3" Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" x:Name="txtWebhookUrl"
+                     Height="30" FontFamily="Consolas" FontSize="12"
+                     VerticalContentAlignment="Center"/>
+            <Button Grid.Column="1" x:Name="btnTest" Content="テスト送信"
+                    Width="100" Height="30" Margin="10,0,0,0"/>
+        </Grid>
+
+        <!-- メッセージ -->
+        <TextBlock Grid.Row="4" Text="メッセージ:" Margin="0,0,0,5"/>
+        <TextBox Grid.Row="5" x:Name="txtMessage"
+                 Height="80" TextWrapping="Wrap" AcceptsReturn="True"
+                 VerticalScrollBarVisibility="Auto"
+                 Margin="0,0,0,15"/>
+
+        <!-- カスタムペイロード（カスタムの場合のみ表示） -->
+        <Border Grid.Row="6" x:Name="pnlCustomPayload" Visibility="Collapsed">
+            <StackPanel>
+                <TextBlock Text="カスタムペイロード (JSON):" Margin="0,0,0,5"/>
+                <TextBox x:Name="txtCustomPayload"
+                         TextWrapping="Wrap" AcceptsReturn="True"
+                         FontFamily="Consolas" FontSize="11"
+                         VerticalScrollBarVisibility="Auto"
+                         Height="120"
+                         Margin="0,0,0,10"/>
+                <TextBlock Text="※ 空の場合は {&quot;message&quot;: &quot;メッセージ&quot;} が使用されます"
+                           FontSize="11" Foreground="#666666" Margin="0,0,0,15"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 説明パネル -->
+        <Border Grid.Row="6" x:Name="pnlServiceInfo" Background="#F5F5F5" Padding="10" CornerRadius="4">
+            <StackPanel>
+                <TextBlock x:Name="txtServiceInfo" TextWrapping="Wrap" FontSize="12"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ボタン -->
+        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button x:Name="btnOK" Content="OK" Width="80" Height="30" Margin="0,0,10,0" IsDefault="True"/>
+            <Button x:Name="btnCancel" Content="キャンセル" Width="80" Height="30" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>
