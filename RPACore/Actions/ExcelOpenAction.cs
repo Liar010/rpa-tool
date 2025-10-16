@@ -38,37 +38,48 @@ public class ExcelOpenAction : ActionBase
                 Context.OpenWorkbooks.Remove(fullPath);
             }
 
-            await Task.Run(() =>
+            XLWorkbook workbook;
+
+            if (File.Exists(fullPath))
             {
-                XLWorkbook workbook;
+                // 既存ファイルを開く
+                workbook = new XLWorkbook(fullPath);
+                LogInfo($"Excelファイルを開きました: {fullPath}");
+            }
+            else if (CreateIfNotExists)
+            {
+                // 新規作成
+                workbook = new XLWorkbook();
+                workbook.AddWorksheet("Sheet1");
+                LogInfo($"Excelファイルを新規作成しました: {fullPath}");
+            }
+            else
+            {
+                throw new FileNotFoundException($"ファイルが見つかりません: {fullPath}");
+            }
 
-                if (File.Exists(fullPath))
-                {
-                    // 既存ファイルを開く
-                    workbook = new XLWorkbook(fullPath);
-                    LogInfo($"Excelファイルを開きました: {fullPath}");
-                }
-                else if (CreateIfNotExists)
-                {
-                    // 新規作成
-                    workbook = new XLWorkbook();
-                    workbook.AddWorksheet("Sheet1");
-                    LogInfo($"Excelファイルを新規作成しました: {fullPath}");
-                }
-                else
-                {
-                    throw new FileNotFoundException($"ファイルが見つかりません: {fullPath}");
-                }
-
-                // コンテキストに保存
-                Context?.OpenWorkbooks.Add(fullPath, workbook);
-            });
+            // コンテキストに保存
+            Context?.OpenWorkbooks.Add(fullPath, workbook);
 
             return true;
+        }
+        catch (FileNotFoundException ex)
+        {
+            LogError($"ファイルが見つかりません: {FilePath}");
+            LogError($"詳細: {ex.Message}");
+            return ContinueOnError;
+        }
+        catch (IOException ex)
+        {
+            // ファイルロックエラー（他のプロセスで使用中）
+            LogError($"ファイルが他のプロセスで使用中です。Excelで開いている場合は閉じてから実行してください: {FilePath}");
+            LogError($"詳細: {ex.Message}");
+            return ContinueOnError;
         }
         catch (Exception ex)
         {
             LogError($"Excelファイルを開く際にエラーが発生しました: {ex.Message}");
+            LogError($"エラー種類: {ex.GetType().Name}");
             return ContinueOnError;
         }
     }

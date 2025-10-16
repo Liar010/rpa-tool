@@ -44,6 +44,7 @@ public partial class MainWindow : Window
         btnAddFileExists.Click += BtnAddFileExists_Click;
         btnAddExcelOpen.Click += BtnAddExcelOpen_Click;
         btnAddExcelCell.Click += BtnAddExcelCell_Click;
+        btnAddExcelRange.Click += BtnAddExcelRange_Click;
         btnAddExcelSheet.Click += BtnAddExcelSheet_Click;
         btnAddExcelSaveClose.Click += BtnAddExcelSaveClose_Click;
 
@@ -273,6 +274,20 @@ public partial class MainWindow : Window
         }
     }
 
+    private void BtnAddExcelRange_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Dialogs.ExcelRangeDialog(_scriptEngine)
+        {
+            Owner = this
+        };
+        if (dialog.ShowDialog() == true)
+        {
+            _scriptEngine.AddAction(dialog.Action!);
+            UpdateActionList();
+            txtStatus.Text = "Excel範囲読み取りアクションを追加しました";
+        }
+    }
+
     private void BtnAddExcelSheet_Click(object sender, RoutedEventArgs e)
     {
         var dialog = new Dialogs.ExcelSheetDialog(this)
@@ -451,6 +466,18 @@ public partial class MainWindow : Window
                 var excelSheetExistsDialog = new Dialogs.ExcelSheetDialog(this, excelSheetExistsAction) { Owner = this };
                 result = excelSheetExistsDialog.ShowDialog();
                 newAction = excelSheetExistsDialog.Action;
+                break;
+
+            case ExcelReadRangeAction excelReadRangeAction:
+                var excelReadRangeDialog = new Dialogs.ExcelRangeDialog(excelReadRangeAction, _scriptEngine) { Owner = this };
+                result = excelReadRangeDialog.ShowDialog();
+                newAction = excelReadRangeDialog.Action;
+                break;
+
+            case ExcelWriteRangeAction excelWriteRangeAction:
+                var excelWriteRangeDialog = new Dialogs.ExcelRangeDialog(excelWriteRangeAction, _scriptEngine) { Owner = this };
+                result = excelWriteRangeDialog.ShowDialog();
+                newAction = excelWriteRangeDialog.Action;
                 break;
 
             default:

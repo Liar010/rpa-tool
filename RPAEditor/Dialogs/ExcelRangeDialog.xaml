@@ -1,0 +1,99 @@
+<Window x:Class="RPAEditor.Dialogs.ExcelRangeDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Excel範囲操作" Height="550" Width="500"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 操作選択 -->
+        <GroupBox Header="操作選択" Grid.Row="0" Padding="10" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton x:Name="rbRead" Content="読み取り" IsChecked="True" Margin="0,0,15,0"/>
+                <RadioButton x:Name="rbWrite" Content="書き込み" Margin="0,0,0,0"/>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- ファイル参照方法 -->
+        <GroupBox Header="ファイル参照方法" Grid.Row="1" Padding="10" Margin="0,0,0,10">
+            <StackPanel>
+                <RadioButton x:Name="rbFilePath" Content="ファイルパスで指定" IsChecked="True" Margin="0,0,0,5"/>
+                <RadioButton x:Name="rbOpenAction" Content="開くアクションの番号で指定" Margin="0,5,0,0"/>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- ファイルパス -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,10">
+            <TextBlock Text="ファイルパス:" Margin="0,0,0,5"/>
+            <DockPanel>
+                <Button x:Name="btnBrowse" Content="参照..." Width="70" DockPanel.Dock="Right" Margin="5,0,0,0"/>
+                <TextBox x:Name="txtFilePath"/>
+            </DockPanel>
+        </StackPanel>
+
+        <!-- 開くアクション番号 -->
+        <StackPanel Grid.Row="3" Margin="0,0,0,10">
+            <TextBlock Text="開くアクション番号:" Margin="0,0,0,5"/>
+            <ComboBox x:Name="cmbOpenAction" Height="25"/>
+        </StackPanel>
+
+        <!-- シート名 -->
+        <StackPanel Grid.Row="4" Margin="0,0,0,10">
+            <TextBlock Text="シート名 (省略時は最初のシート):" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtSheetName"/>
+        </StackPanel>
+
+        <!-- 範囲 -->
+        <StackPanel Grid.Row="5" Margin="0,0,0,10">
+            <TextBlock Text="範囲 (例: A1:B10):" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtRange"/>
+        </StackPanel>
+
+        <!-- 書き込み値入力（書き込み時のみ表示） -->
+        <StackPanel x:Name="pnlWriteValue" Grid.Row="6" Margin="0,0,0,10" Visibility="Collapsed">
+            <TextBlock Text="書き込み値の入力方法:" Margin="0,0,0,5"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                <RadioButton x:Name="rbDirectInput" Content="直接入力" IsChecked="True" Margin="0,0,15,0"/>
+                <RadioButton x:Name="rbReadReference" Content="読み取りアクション参照"/>
+            </StackPanel>
+
+            <TextBlock x:Name="lblDirectValue" Text="値 (タブ区切り・改行区切り):" Margin="0,5,0,5"/>
+            <TextBox x:Name="txtValue" Height="60" TextWrapping="Wrap" AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Auto"/>
+
+            <TextBlock x:Name="lblReadAction" Text="読み取りアクション番号:" Margin="0,5,0,5" Visibility="Collapsed"/>
+            <ComboBox x:Name="cmbReadAction" Height="25" Visibility="Collapsed"/>
+        </StackPanel>
+
+        <!-- 注意書き -->
+        <Border Grid.Row="7" Background="#FFF9E6" BorderBrush="#FFD700" BorderThickness="1"
+                Padding="10" Margin="0,0,0,15">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="⚠" FontSize="16" Foreground="#FF8C00" Margin="0,0,10,0" VerticalAlignment="Top"/>
+                <TextBlock TextWrapping="Wrap" Foreground="#333333">
+                    <Run Text="注意: セル内にタブ文字や改行が含まれる場合、"/>
+                    <LineBreak/>
+                    <Run Text="読み取り結果が正しく分割されない可能性があります。"/>
+                    <LineBreak/>
+                    <Run Text="データは単一セルに単一の値が入っている前提で動作します。"/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- ボタン -->
+        <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="btnOK" Content="OK" Width="80" Height="30" Margin="0,0,10,0" IsDefault="True"/>
+            <Button x:Name="btnCancel" Content="キャンセル" Width="80" Height="30" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

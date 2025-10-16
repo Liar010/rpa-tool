@@ -76,6 +76,7 @@
                             <StackPanel Margin="5,5,0,5">
                                 <Button x:Name="btnAddExcelOpen" Content="ファイルを開く" Margin="0,3" Padding="5" Height="32"/>
                                 <Button x:Name="btnAddExcelCell" Content="セル操作" Margin="0,3" Padding="5" Height="32"/>
+                                <Button x:Name="btnAddExcelRange" Content="範囲操作" Margin="0,3" Padding="5" Height="32"/>
                                 <Button x:Name="btnAddExcelSheet" Content="シート操作" Margin="0,3" Padding="5" Height="32"/>
                                 <Button x:Name="btnAddExcelSaveClose" Content="保存/閉じる" Margin="0,3" Padding="5" Height="32"/>
                             </StackPanel>

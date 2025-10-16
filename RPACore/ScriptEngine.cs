@@ -252,6 +252,13 @@ public class ScriptEngine
                 nameof(ExcelOpenAction) => JsonSerializer.Deserialize<ExcelOpenAction>(actionData.Data),
                 nameof(ExcelReadCellAction) => JsonSerializer.Deserialize<ExcelReadCellAction>(actionData.Data),
                 nameof(ExcelWriteCellAction) => JsonSerializer.Deserialize<ExcelWriteCellAction>(actionData.Data),
+                nameof(ExcelReadRangeAction) => JsonSerializer.Deserialize<ExcelReadRangeAction>(actionData.Data),
+                nameof(ExcelWriteRangeAction) => JsonSerializer.Deserialize<ExcelWriteRangeAction>(actionData.Data),
+                nameof(ExcelAddSheetAction) => JsonSerializer.Deserialize<ExcelAddSheetAction>(actionData.Data),
+                nameof(ExcelDeleteSheetAction) => JsonSerializer.Deserialize<ExcelDeleteSheetAction>(actionData.Data),
+                nameof(ExcelRenameSheetAction) => JsonSerializer.Deserialize<ExcelRenameSheetAction>(actionData.Data),
+                nameof(ExcelCopySheetAction) => JsonSerializer.Deserialize<ExcelCopySheetAction>(actionData.Data),
+                nameof(ExcelSheetExistsAction) => JsonSerializer.Deserialize<ExcelSheetExistsAction>(actionData.Data),
                 nameof(ExcelSaveAction) => JsonSerializer.Deserialize<ExcelSaveAction>(actionData.Data),
                 nameof(ExcelCloseAction) => JsonSerializer.Deserialize<ExcelCloseAction>(actionData.Data),
                 _ => throw new InvalidOperationException($"未知のアクションタイプ: {actionData.Type}")
