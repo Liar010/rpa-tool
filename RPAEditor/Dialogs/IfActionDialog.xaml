@@ -1,0 +1,73 @@
+<Window x:Class="RPAEditor.Dialogs.IfActionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="条件分岐アクション"
+        Height="420" Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 左辺値 -->
+        <TextBlock Grid.Row="0" Text="左辺値（変数または値）:" Margin="0,0,0,5"/>
+        <TextBox x:Name="txtLeftValue" Grid.Row="0" Margin="0,20,0,0" Height="25"/>
+
+        <!-- 条件 -->
+        <TextBlock Grid.Row="1" Text="条件:" Margin="0,15,0,5"/>
+        <ComboBox x:Name="cmbConditionType" Grid.Row="1" Margin="0,35,0,0" Height="25">
+            <ComboBoxItem Content="等しい (==)" Tag="Equal" IsSelected="True"/>
+            <ComboBoxItem Content="等しくない (!=)" Tag="NotEqual"/>
+            <ComboBoxItem Content="より大きい (&gt;)" Tag="GreaterThan"/>
+            <ComboBoxItem Content="以上 (&gt;=)" Tag="GreaterThanOrEqual"/>
+            <ComboBoxItem Content="より小さい (&lt;)" Tag="LessThan"/>
+            <ComboBoxItem Content="以下 (&lt;=)" Tag="LessThanOrEqual"/>
+            <ComboBoxItem Content="含む" Tag="Contains"/>
+            <ComboBoxItem Content="含まない" Tag="NotContains"/>
+            <ComboBoxItem Content="空である" Tag="IsEmpty"/>
+            <ComboBoxItem Content="空でない" Tag="IsNotEmpty"/>
+        </ComboBox>
+
+        <!-- 右辺値 -->
+        <TextBlock Grid.Row="2" x:Name="lblRightValue" Text="右辺値（変数または値）:" Margin="0,15,0,5"/>
+        <TextBox x:Name="txtRightValue" Grid.Row="2" Margin="0,35,0,0" Height="25"/>
+
+        <!-- 真の場合のアクション -->
+        <TextBlock Grid.Row="3" Text="条件が真の場合:" Margin="0,15,0,5"/>
+        <ComboBox x:Name="cmbThenAction" Grid.Row="3" Margin="0,35,0,0" Height="25">
+            <ComboBoxItem Content="次のアクションに進む" Tag="Continue" IsSelected="True"/>
+            <ComboBoxItem Content="次のアクションをスキップ" Tag="SkipNext"/>
+            <ComboBoxItem Content="指定したアクションにジャンプ" Tag="JumpToAction"/>
+            <ComboBoxItem Content="スクリプトを終了" Tag="ExitScript"/>
+        </ComboBox>
+
+        <!-- ジャンプ先 -->
+        <StackPanel Grid.Row="4" x:Name="pnlJumpTo" Orientation="Horizontal" Margin="0,10,0,0" Visibility="Collapsed">
+            <TextBlock Text="ジャンプ先アクション番号:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBox x:Name="txtJumpToActionIndex" Width="80" Height="25"/>
+        </StackPanel>
+
+        <!-- 説明 -->
+        <TextBlock Grid.Row="6" Margin="0,15,0,0" TextWrapping="Wrap" Foreground="#666666">
+            <Run Text="• ${変数名} 形式で変数を参照できます"/>
+            <LineBreak/>
+            <Run Text="• 数値比較は自動的に数値として評価されます"/>
+            <LineBreak/>
+            <Run Text="• 「空である」「空でない」は右辺値を無視します"/>
+        </TextBlock>
+
+        <!-- ボタン -->
+        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+            <Button x:Name="btnOK" Content="OK" Width="80" Height="30" Margin="0,0,10,0" IsDefault="True"/>
+            <Button x:Name="btnCancel" Content="キャンセル" Width="80" Height="30" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

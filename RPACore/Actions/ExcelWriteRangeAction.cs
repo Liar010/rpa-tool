@@ -17,7 +17,8 @@ public class ExcelWriteRangeAction : ActionBase
         {
             var fileRef = string.IsNullOrEmpty(FilePath) ? $"#{OpenActionIndex}" : FilePath;
             var valueRef = string.IsNullOrEmpty(Value) ? $"#{ReadActionIndex}の値" : "直接入力値";
-            return $"ファイル: {fileRef}, シート: {(string.IsNullOrEmpty(SheetName) ? "(最初のシート)" : SheetName)}, 範囲: {Range}, 値: {valueRef}";
+            var autoExpandNote = AutoExpandRange ? " (自動拡張)" : "";
+            return $"ファイル: {fileRef}, シート: {(string.IsNullOrEmpty(SheetName) ? "(最初のシート)" : SheetName)}, 範囲: {Range}{autoExpandNote}, 値: {valueRef}";
         }
     }
 
@@ -37,9 +38,15 @@ public class ExcelWriteRangeAction : ActionBase
     public string SheetName { get; set; } = string.Empty;
 
     /// <summary>
-    /// 範囲（例: A1:B10）
+    /// 書き込み開始位置（例: A1）またはセル範囲（例: A1:B10）
+    /// ※AutoExpandRange=trueの場合は開始位置のみ指定（例: A1）
     /// </summary>
     public string Range { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 範囲を自動拡張するかどうか（ReadActionIndexから読み取ったデータサイズに合わせる）
+    /// </summary>
+    public bool AutoExpandRange { get; set; } = false;
 
     /// <summary>
     /// 書き込む値（タブ区切り・改行区切り）
@@ -171,11 +178,40 @@ public class ExcelWriteRangeAction : ActionBase
                 LogWarn("書き込む値が空です");
             }
 
-            // 範囲を取得
-            var range = worksheet.Range(Range);
-
-            // タブ・改行区切りの文字列を2次元配列に変換して書き込み
+            // タブ・改行区切りの文字列を2次元配列に変換
             var lines = writeValue.Split('\n');
+            int dataRowCount = lines.Length;
+            int dataColCount = lines.Length > 0 ? lines.Max(l => l.Split('\t').Length) : 0;
+
+            // 範囲を決定
+            IXLRange range;
+            if (AutoExpandRange)
+            {
+                // 自動拡張モード: 開始位置からデータサイズに合わせて範囲を拡張
+                LogDebug($"自動拡張モード: {Range} から {dataRowCount}行 x {dataColCount}列に拡張");
+
+                // Rangeは開始位置のみ（例: A1）を想定
+                var startCell = worksheet.Cell(Range);
+                var endRow = startCell.Address.RowNumber + dataRowCount - 1;
+                var endCol = startCell.Address.ColumnNumber + dataColCount - 1;
+
+                range = worksheet.Range(
+                    startCell.Address.RowNumber,
+                    startCell.Address.ColumnNumber,
+                    endRow,
+                    endCol
+                );
+
+                LogInfo($"書き込み範囲: {startCell.Address} から {worksheet.Cell(endRow, endCol).Address}");
+            }
+            else
+            {
+                // 固定範囲モード
+                range = worksheet.Range(Range);
+                LogDebug($"固定範囲モード: {Range}");
+            }
+
+            // データを書き込み
             int rowIndex = 0;
 
             foreach (var line in lines)
@@ -188,13 +224,16 @@ public class ExcelWriteRangeAction : ActionBase
                     var currentRow = range.FirstCell().Address.RowNumber + rowIndex;
                     var currentCol = range.FirstCell().Address.ColumnNumber + colIndex;
 
-                    // 範囲外チェック
-                    if (currentRow > range.LastCell().Address.RowNumber ||
-                        currentCol > range.LastCell().Address.ColumnNumber)
+                    // 範囲外チェック（固定範囲モードの場合のみ）
+                    if (!AutoExpandRange)
                     {
-                        LogWarn($"データが範囲を超えました。行{rowIndex + 1}, 列{colIndex + 1}はスキップされます");
-                        colIndex++;
-                        continue;
+                        if (currentRow > range.LastCell().Address.RowNumber ||
+                            currentCol > range.LastCell().Address.ColumnNumber)
+                        {
+                            LogWarn($"データが範囲を超えました。行{rowIndex + 1}, 列{colIndex + 1}はスキップされます");
+                            colIndex++;
+                            continue;
+                        }
                     }
 
                     worksheet.Cell(currentRow, currentCol).Value = cellValue;
@@ -204,7 +243,7 @@ public class ExcelWriteRangeAction : ActionBase
                 rowIndex++;
             }
 
-            LogInfo($"範囲書き込み完了: {rowIndex}行 x {lines.Max(l => l.Split('\t').Length)}列");
+            LogInfo($"範囲書き込み完了: {rowIndex}行 x {dataColCount}列");
 
             return await Task.FromResult(true);
         }

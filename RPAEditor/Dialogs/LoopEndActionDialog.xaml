@@ -1,0 +1,71 @@
+<Window x:Class="RPAEditor.Dialogs.LoopEndActionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ループ終了アクション"
+        Height="450" Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ループ開始アクション番号 -->
+        <TextBlock Grid.Row="0" Text="対応するループ開始アクション番号:" Margin="0,0,0,5"/>
+        <ComboBox x:Name="cmbLoopStartAction" Grid.Row="0" Margin="0,25,0,0" Height="25" DisplayMemberPath="DisplayText"/>
+
+        <!-- 終了条件 -->
+        <TextBlock Grid.Row="1" Text="終了条件:" Margin="0,15,0,5"/>
+        <ComboBox x:Name="cmbEndConditionType" Grid.Row="1" Margin="0,35,0,0" Height="25">
+            <ComboBoxItem Content="常に終了（無限ループ防止）" Tag="Always" IsSelected="True"/>
+            <ComboBoxItem Content="値が等しい場合" Tag="IfEqual"/>
+            <ComboBoxItem Content="値が等しくない場合" Tag="IfNotEqual"/>
+            <ComboBoxItem Content="値がより大きい場合" Tag="IfGreaterThan"/>
+            <ComboBoxItem Content="値がより小さい場合" Tag="IfLessThan"/>
+            <ComboBoxItem Content="値が空の場合" Tag="IfEmpty"/>
+            <ComboBoxItem Content="値が空でない場合" Tag="IfNotEmpty"/>
+            <ComboBoxItem Content="最大繰り返し回数に達した場合" Tag="MaxIterations"/>
+        </ComboBox>
+
+        <!-- 左辺値 -->
+        <StackPanel Grid.Row="2" x:Name="pnlLeftValue" Margin="0,15,0,0" Visibility="Collapsed">
+            <TextBlock Text="左辺値（変数または値）:" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtLeftValue" Height="25"/>
+        </StackPanel>
+
+        <!-- 右辺値 -->
+        <StackPanel Grid.Row="3" x:Name="pnlRightValue" Margin="0,10,0,0" Visibility="Collapsed">
+            <TextBlock Text="右辺値（変数または値）:" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtRightValue" Height="25"/>
+        </StackPanel>
+
+        <!-- 最大繰り返し回数 -->
+        <StackPanel Grid.Row="4" x:Name="pnlMaxIterations" Orientation="Horizontal" Margin="0,10,0,0" Visibility="Collapsed">
+            <TextBlock Text="最大繰り返し回数:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBox x:Name="txtMaxIterations" Width="100" Height="25" Text="100"/>
+        </StackPanel>
+
+        <!-- 説明 -->
+        <TextBlock Grid.Row="5" Margin="0,15,0,0" TextWrapping="Wrap" Foreground="#666666">
+            <Run Text="• ループの終了位置と終了条件を示します"/>
+            <LineBreak/>
+            <Run Text="• 条件が真の場合、ループを抜けて次のアクションに進みます"/>
+            <LineBreak/>
+            <Run Text="• 条件が偽の場合、対応するループ開始に戻ります"/>
+            <LineBreak/>
+            <Run Text="• ${変数名} 形式で変数を参照できます"/>
+        </TextBlock>
+
+        <!-- ボタン -->
+        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+            <Button x:Name="btnOK" Content="OK" Width="80" Height="30" Margin="0,0,10,0" IsDefault="True"/>
+            <Button x:Name="btnCancel" Content="キャンセル" Width="80" Height="30" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

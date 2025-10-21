@@ -27,6 +27,10 @@ public partial class ExcelRangeDialog : Window
         rbOpenAction.Checked += ReferenceMethod_Changed;
         rbDirectInput.Checked += WriteValueMethod_Changed;
         rbReadReference.Checked += WriteValueMethod_Changed;
+        rbFixedRange.Checked += ReadMode_Changed;
+        rbVariableRows.Checked += ReadMode_Changed;
+        chkAutoExpandRange.Checked += (s, e) => UpdateControlStates();
+        chkAutoExpandRange.Unchecked += (s, e) => UpdateControlStates();
         btnBrowse.Click += BtnBrowse_Click;
         btnOK.Click += BtnOK_Click;
 
@@ -58,7 +62,21 @@ public partial class ExcelRangeDialog : Window
         }
 
         txtSheetName.Text = existingAction.SheetName;
-        txtRange.Text = existingAction.Range;
+
+        // 可変行数モードか固定範囲モードか
+        if (existingAction.ReadVariableRows)
+        {
+            rbVariableRows.IsChecked = true;
+            txtStartColumn.Text = existingAction.StartColumn;
+            txtHeaderRow.Text = existingAction.HeaderRow.ToString();
+            txtDataStartRow.Text = existingAction.DataStartRow.ToString();
+            txtColumnCount.Text = existingAction.ColumnCount.ToString();
+        }
+        else
+        {
+            rbFixedRange.IsChecked = true;
+            txtRange.Text = existingAction.Range;
+        }
 
         UpdateControlStates();
     }
@@ -95,6 +113,8 @@ public partial class ExcelRangeDialog : Window
             rbReadReference.IsChecked = true;
             SelectComboBoxItemByTag(cmbReadAction, existingAction.ReadActionIndex);
         }
+
+        chkAutoExpandRange.IsChecked = existingAction.AutoExpandRange;
 
         UpdateControlStates();
     }
@@ -176,10 +196,56 @@ public partial class ExcelRangeDialog : Window
         UpdateControlStates();
     }
 
+    private void ReadMode_Changed(object sender, RoutedEventArgs e)
+    {
+        UpdateControlStates();
+    }
+
     private void UpdateControlStates()
     {
-        // 操作選択に応じて書き込み値入力欄の表示/非表示
+        bool isRead = rbRead?.IsChecked == true;
         bool isWrite = rbWrite?.IsChecked == true;
+
+        // 操作選択に応じて読み取りモード選択の表示/非表示
+        if (pnlReadMode != null)
+            pnlReadMode.Visibility = isRead ? Visibility.Visible : Visibility.Collapsed;
+
+        // 読み取りモードに応じて固定範囲/可変行数パネルの表示/非表示
+        bool isFixedRange = rbFixedRange?.IsChecked == true;
+        if (isRead)
+        {
+            if (pnlFixedRange != null)
+                pnlFixedRange.Visibility = isFixedRange ? Visibility.Visible : Visibility.Collapsed;
+            if (pnlVariableRows != null)
+                pnlVariableRows.Visibility = isFixedRange ? Visibility.Collapsed : Visibility.Visible;
+        }
+        else
+        {
+            // 書き込み時は常に固定範囲（または開始位置のみ）
+            if (pnlFixedRange != null)
+                pnlFixedRange.Visibility = Visibility.Visible;
+            if (pnlVariableRows != null)
+                pnlVariableRows.Visibility = Visibility.Collapsed;
+        }
+
+        // 書き込み時はラベルを変更
+        if (lblRange != null)
+        {
+            if (isWrite && chkAutoExpandRange?.IsChecked == true)
+            {
+                lblRange.Text = "書き込み開始位置 (例: A1):";
+            }
+            else if (isWrite)
+            {
+                lblRange.Text = "範囲 (例: A1:B10):";
+            }
+            else
+            {
+                lblRange.Text = "範囲 (例: A1:B10):";
+            }
+        }
+
+        // 操作選択に応じて書き込み値入力欄の表示/非表示
         if (pnlWriteValue != null)
             pnlWriteValue.Visibility = isWrite ? Visibility.Visible : Visibility.Collapsed;
 
@@ -258,34 +324,99 @@ public partial class ExcelRangeDialog : Window
             openActionIndex = (int)selectedItem.Tag;
         }
 
-        if (string.IsNullOrWhiteSpace(txtRange.Text))
-        {
-            MessageBox.Show("範囲を指定してください（例: A1:B10）。", "入力エラー",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
-        }
-
-        // 範囲の簡易検証
-        if (!IsValidRangeFormat(txtRange.Text))
-        {
-            MessageBox.Show("範囲の形式が正しくありません。\n例: A1:B10, C5:E20", "入力エラー",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
-        }
-
         // 読み取りまたは書き込みアクションを作成
         if (rbRead.IsChecked == true)
         {
-            Action = new ExcelReadRangeAction
+            // 読み取りアクションのバリデーションと作成
+            if (rbVariableRows.IsChecked == true)
             {
-                FilePath = filePath,
-                OpenActionIndex = openActionIndex,
-                SheetName = txtSheetName.Text.Trim(),
-                Range = txtRange.Text.Trim()
-            };
+                // 可変行数モード
+                if (string.IsNullOrWhiteSpace(txtStartColumn.Text))
+                {
+                    MessageBox.Show("開始列を指定してください（例: A）。", "入力エラー",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (!int.TryParse(txtHeaderRow.Text, out int headerRow) || headerRow <= 0)
+                {
+                    MessageBox.Show("ヘッダー行番号は1以上の整数である必要があります。", "入力エラー",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (!int.TryParse(txtDataStartRow.Text, out int dataStartRow) || dataStartRow <= headerRow)
+                {
+                    MessageBox.Show("データ開始行番号はヘッダー行より後である必要があります。", "入力エラー",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (!int.TryParse(txtColumnCount.Text, out int columnCount) || columnCount < 0)
+                {
+                    MessageBox.Show("列数は0以上の整数である必要があります（0=自動検出）。", "入力エラー",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                Action = new ExcelReadRangeAction
+                {
+                    FilePath = filePath,
+                    OpenActionIndex = openActionIndex,
+                    SheetName = txtSheetName.Text.Trim(),
+                    ReadVariableRows = true,
+                    StartColumn = txtStartColumn.Text.Trim(),
+                    HeaderRow = headerRow,
+                    DataStartRow = dataStartRow,
+                    ColumnCount = columnCount
+                };
+            }
+            else
+            {
+                // 固定範囲モード
+                if (string.IsNullOrWhiteSpace(txtRange.Text))
+                {
+                    MessageBox.Show("範囲を指定してください（例: A1:B10）。", "入力エラー",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (!IsValidRangeFormat(txtRange.Text))
+                {
+                    MessageBox.Show("範囲の形式が正しくありません。\n例: A1:B10, C5:E20", "入力エラー",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                Action = new ExcelReadRangeAction
+                {
+                    FilePath = filePath,
+                    OpenActionIndex = openActionIndex,
+                    SheetName = txtSheetName.Text.Trim(),
+                    ReadVariableRows = false,
+                    Range = txtRange.Text.Trim()
+                };
+            }
         }
         else
         {
+            // 書き込みアクション
+            if (string.IsNullOrWhiteSpace(txtRange.Text))
+            {
+                MessageBox.Show("範囲または開始位置を指定してください（例: A1:B10 または A1）。", "入力エラー",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // 自動拡張モードの場合はセル1つでOK、固定範囲モードの場合は範囲形式をチェック
+            bool autoExpand = chkAutoExpandRange.IsChecked == true;
+            if (!autoExpand && !IsValidRangeFormat(txtRange.Text) && !IsValidCellAddress(txtRange.Text))
+            {
+                MessageBox.Show("範囲の形式が正しくありません。\n例: A1:B10, C5:E20", "入力エラー",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             // 書き込み値のバリデーション
             string value = string.Empty;
             int readActionIndex = 0;
@@ -314,7 +445,8 @@ public partial class ExcelRangeDialog : Window
                 SheetName = txtSheetName.Text.Trim(),
                 Range = txtRange.Text.Trim(),
                 Value = value,
-                ReadActionIndex = readActionIndex
+                ReadActionIndex = readActionIndex,
+                AutoExpandRange = autoExpand
             };
         }
 
@@ -336,5 +468,14 @@ public partial class ExcelRangeDialog : Window
         return parts.All(p => !string.IsNullOrWhiteSpace(p) &&
                               p.Length > 0 &&
                               char.IsLetter(p[0]));
+    }
+
+    private bool IsValidCellAddress(string cell)
+    {
+        // 簡易的な検証: "A1" のような形式かチェック
+        if (string.IsNullOrWhiteSpace(cell))
+            return false;
+
+        return cell.Length > 0 && char.IsLetter(cell[0]);
     }
 }

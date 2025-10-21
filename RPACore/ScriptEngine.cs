@@ -25,6 +25,9 @@ public class ExecutionContext
     /// <summary>開いているExcelワークブック（複数ファイル対応）</summary>
     public Dictionary<string, XLWorkbook> OpenWorkbooks { get; } = new();
 
+    /// <summary>変数ストア（変数名→値のマッピング）</summary>
+    public Dictionary<string, object> Variables { get; } = new();
+
     /// <summary>ScriptEngineへの参照（アクションリストにアクセスするため）</summary>
     public ScriptEngine? ScriptEngine { get; set; }
 
@@ -38,6 +41,24 @@ public class ExecutionContext
             workbook?.Dispose();
         }
         OpenWorkbooks.Clear();
+
+        Variables.Clear();
+    }
+
+    /// <summary>
+    /// 変数を取得
+    /// </summary>
+    public object? GetVariable(string name)
+    {
+        return Variables.ContainsKey(name) ? Variables[name] : null;
+    }
+
+    /// <summary>
+    /// 変数を設定
+    /// </summary>
+    public void SetVariable(string name, object value)
+    {
+        Variables[name] = value;
     }
 }
 
