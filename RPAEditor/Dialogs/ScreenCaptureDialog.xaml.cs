@@ -11,6 +11,7 @@ namespace RPAEditor;
 public partial class ScreenCaptureDialog : Window
 {
     public string? SavedImagePath { get; private set; }
+    public event EventHandler? CaptureCompleted;
 
     private System.Windows.Point _startPoint;
     private bool _isSelecting;
@@ -87,48 +88,53 @@ public partial class ScreenCaptureDialog : Window
         // 少し待機してからキャプチャ（ウィンドウが完全に消えるまで）
         await Task.Delay(200);
 
-        // CaptureAndSaveを実行（Close()はこの中で呼ばれる）
-        // ここでawaitしないので、CaptureAndSaveは同期的に実行される
-        CaptureAndSave((int)x, (int)y, (int)width, (int)height);
-
-        // CaptureAndSaveの中でClose()が呼ばれるので、ここでは何もしない
+        // CaptureAndSaveを実行（完了まで待機）
+        await CaptureAndSaveAsync((int)x, (int)y, (int)width, (int)height);
     }
 
-    private void CaptureAndSave(int x, int y, int width, int height)
+    private async Task CaptureAndSaveAsync(int x, int y, int width, int height)
     {
         System.Diagnostics.Debug.WriteLine($"CaptureAndSave called: x={x}, y={y}, w={width}, h={height}");
         System.Diagnostics.Debug.WriteLine($"Script path: {_scriptPath}");
 
-        try
+        await Task.Run(() =>
         {
-            // スクリーンキャプチャ
-            using var bitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-            using (var graphics = Graphics.FromImage(bitmap))
+            try
             {
-                graphics.CopyFromScreen(x, y, 0, 0, new System.Drawing.Size(width, height));
+                // スクリーンキャプチャ
+                using var bitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+                using (var graphics = Graphics.FromImage(bitmap))
+                {
+                    graphics.CopyFromScreen(x, y, 0, 0, new System.Drawing.Size(width, height));
+                }
+
+                // 保存先パスを生成
+                SavedImagePath = ScriptPathManager.GenerateImageFilePath(_scriptPath, "mouse_click");
+                System.Diagnostics.Debug.WriteLine($"Image will be saved to: {SavedImagePath}");
+
+                // 画像を保存
+                bitmap.Save(SavedImagePath, ImageFormat.Png);
+                System.Diagnostics.Debug.WriteLine($"Image saved successfully");
+                System.Diagnostics.Debug.WriteLine($"SavedImagePath property is now: {SavedImagePath}");
             }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in CaptureAndSave: {ex.Message}");
+                // UIスレッドでメッセージボックスを表示
+                Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show($"画像の保存に失敗しました: {ex.Message}\n\n{ex.StackTrace}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                });
+                SavedImagePath = null; // エラー時はnullに戻す
+            }
+        });
 
-            // 保存先パスを生成
-            SavedImagePath = ScriptPathManager.GenerateImageFilePath(_scriptPath, "mouse_click");
-            System.Diagnostics.Debug.WriteLine($"Image will be saved to: {SavedImagePath}");
-
-            // 画像を保存
-            bitmap.Save(SavedImagePath, ImageFormat.Png);
-            System.Diagnostics.Debug.WriteLine($"Image saved successfully");
-            System.Diagnostics.Debug.WriteLine($"SavedImagePath property is now: {SavedImagePath}");
-            System.Diagnostics.Debug.WriteLine($"About to close dialog...");
-
-            Close();
-
-            System.Diagnostics.Debug.WriteLine($"Dialog closed");
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Error in CaptureAndSave: {ex.Message}");
-            MessageBox.Show($"画像の保存に失敗しました: {ex.Message}\n\n{ex.StackTrace}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
-            SavedImagePath = null; // エラー時はnullに戻す
-            Close();
-        }
+        // 保存完了後にイベントを発火してからダイアログを閉じる
+        System.Diagnostics.Debug.WriteLine($"About to fire CaptureCompleted event... SavedImagePath={SavedImagePath}");
+        CaptureCompleted?.Invoke(this, EventArgs.Empty);
+        System.Diagnostics.Debug.WriteLine($"About to close dialog...");
+        Close();
+        System.Diagnostics.Debug.WriteLine($"Dialog closed");
     }
 
     private void Window_KeyDown(object sender, KeyEventArgs e)

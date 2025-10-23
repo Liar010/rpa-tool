@@ -26,18 +26,19 @@ namespace RPACore
 
         /// <summary>
         /// スクリプトファイルパスから画像フォルダパスを取得
+        /// 新しい方式: Scripts/スクリプト名/images/
         /// </summary>
         /// <param name="scriptFilePath">スクリプトファイルのパス</param>
-        /// <returns>画像フォルダパス（例: "Scripts/勤怠入力_images/"）</returns>
+        /// <returns>画像フォルダパス（例: "Scripts/勤怠入力/images/"）</returns>
         public static string GetImageFolderPath(string scriptFilePath)
         {
             if (string.IsNullOrEmpty(scriptFilePath))
-                return Path.Combine(ScriptsDirectory, "未保存_images");
+                return Path.Combine(ScriptsDirectory, "未保存", "images");
 
-            string scriptFileName = Path.GetFileNameWithoutExtension(scriptFilePath);
+            // スクリプトファイルのディレクトリ = スクリプトフォルダ
             string scriptDirectory = Path.GetDirectoryName(scriptFilePath) ?? ScriptsDirectory;
 
-            return Path.Combine(scriptDirectory, $"{scriptFileName}_images");
+            return Path.Combine(scriptDirectory, "images");
         }
 
         /// <summary>

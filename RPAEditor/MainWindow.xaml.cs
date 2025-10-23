@@ -45,9 +45,12 @@ public partial class MainWindow : Window
 
     private void HomePage_NewScriptRequested(object? sender, System.EventArgs e)
     {
-        // 新規スクリプト作成（空のエディタを開く）
+        // 新規スクリプト作成（エディタを開いて仮フォルダを作成）
         _scriptEngine.ClearActions();
         ShowEditorPage();
+
+        // エディタページで仮フォルダを作成
+        _editorPage?.CreateNewScript();
     }
 
     private void HomePage_ScriptFileSelected(object? sender, string scriptFilePath)

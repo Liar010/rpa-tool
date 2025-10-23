@@ -201,25 +201,36 @@ public partial class MouseActionDialog : Window
         // スクリーンキャプチャダイアログを表示
         System.Diagnostics.Debug.WriteLine($"Opening ScreenCaptureDialog with script path: {_currentScriptPath}");
         var captureDialog = new ScreenCaptureDialog(_currentScriptPath);
+
+        // 完了イベントを購読
+        captureDialog.CaptureCompleted += (s, args) =>
+        {
+            System.Diagnostics.Debug.WriteLine($"CaptureCompleted event fired. SavedImagePath = {captureDialog.SavedImagePath}");
+
+            if (!string.IsNullOrEmpty(captureDialog.SavedImagePath))
+            {
+                txtTemplatePath.Text = captureDialog.SavedImagePath;
+                System.Diagnostics.Debug.WriteLine($"Path set to textbox: {txtTemplatePath.Text}");
+
+                // ダイアログが閉じた後にメッセージボックスを表示
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    MessageBox.Show(
+                        $"画像を保存しました:\n{captureDialog.SavedImagePath}",
+                        "保存完了",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information
+                    );
+                }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("SavedImagePath is null or empty in CaptureCompleted event");
+            }
+        };
+
         captureDialog.ShowDialog();
-
-        System.Diagnostics.Debug.WriteLine($"ScreenCaptureDialog closed. SavedImagePath = {captureDialog.SavedImagePath}");
-
-        if (!string.IsNullOrEmpty(captureDialog.SavedImagePath))
-        {
-            txtTemplatePath.Text = captureDialog.SavedImagePath;
-            System.Diagnostics.Debug.WriteLine($"Path set to textbox: {txtTemplatePath.Text}");
-            MessageBox.Show(
-                $"画像を保存しました:\n{captureDialog.SavedImagePath}",
-                "保存完了",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information
-            );
-        }
-        else
-        {
-            System.Diagnostics.Debug.WriteLine("SavedImagePath is null or empty - no path set");
-        }
+        System.Diagnostics.Debug.WriteLine($"ScreenCaptureDialog ShowDialog returned.");
     }
 
     private void BtnOK_Click(object sender, RoutedEventArgs e)

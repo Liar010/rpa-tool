@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,6 +19,8 @@ public partial class EditorPage : UserControl
     private Window? _ownerWindow;
     private readonly RecentFilesManager _recentFilesManager;
     private string? _currentScriptPath;
+    private string? _currentScriptFolder;  // スクリプトフォルダのパス
+    private bool _isScriptNamed = false;   // スクリプト名が確定しているか
 
     public EditorPage(ScriptEngine scriptEngine, Window ownerWindow)
     {
@@ -80,8 +83,13 @@ public partial class EditorPage : UserControl
             await _scriptEngine.LoadFromFileAsync(filePath);
             _recentFilesManager.AddFile(filePath);
             _currentScriptPath = filePath;
+
+            // スクリプトフォルダを設定（既存スクリプトは名前確定済み）
+            _currentScriptFolder = Path.GetDirectoryName(filePath);
+            _isScriptNamed = true;
+
             UpdateActionList();
-            txtStatus.Text = $"スクリプトを読み込みました: {System.IO.Path.GetFileName(filePath)}";
+            txtStatus.Text = $"スクリプトを読み込みました: {Path.GetFileName(filePath)}";
         }
         catch (Exception ex)
         {
@@ -563,6 +571,32 @@ public partial class EditorPage : UserControl
         }
     }
 
+    /// <summary>
+    /// 新規スクリプトを作成（仮フォルダ生成）
+    /// </summary>
+    public void CreateNewScript()
+    {
+        // Scripts フォルダが存在しなければ作成
+        RPACore.ScriptPathManager.EnsureScriptsFolderExists();
+
+        // 新規スクリプト用の一時フォルダを作成
+        string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        string folderName = $"新規スクリプト_{timestamp}";
+        _currentScriptFolder = Path.Combine(RPACore.ScriptPathManager.ScriptsDirectory, folderName);
+        Directory.CreateDirectory(_currentScriptFolder);
+
+        // images フォルダも作成
+        Directory.CreateDirectory(Path.Combine(_currentScriptFolder, "images"));
+
+        // スクリプトパスを設定（まだ保存していない）
+        _currentScriptPath = Path.Combine(_currentScriptFolder, "script.rpa.json");
+        _isScriptNamed = false;
+
+        _scriptEngine.ClearActions();
+        UpdateActionList();
+        txtStatus.Text = $"新規スクリプトを作成しました: {folderName}（未保存）";
+    }
+
     private void BtnNewScript_Click(object sender, RoutedEventArgs e)
     {
         if (_scriptEngine.Actions.Count > 0)
@@ -574,37 +608,69 @@ public partial class EditorPage : UserControl
                 return;
         }
 
-        _scriptEngine.ClearActions();
-        UpdateActionList();
-        txtStatus.Text = "新規スクリプトを作成しました";
+        // 新規スクリプトを作成
+        CreateNewScript();
     }
 
     private async void BtnSaveScript_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new SaveFileDialog
-        {
-            Filter = "RPA Script (*.rpa.json)|*.rpa.json|All Files (*.*)|*.*",
-            DefaultExt = ".rpa.json"
-        };
+        System.Diagnostics.Debug.WriteLine($"Save button clicked. _currentScriptPath={_currentScriptPath}, _isScriptNamed={_isScriptNamed}");
 
-        if (dialog.ShowDialog() == true)
+        // スクリプトフォルダが未作成の場合は新規作成
+        if (string.IsNullOrEmpty(_currentScriptPath))
         {
-            try
-            {
-                // テンプレート変数を展開
-                var expandedFileName = FileNameTemplateHelper.Expand(dialog.FileName);
+            MessageBox.Show("先に「新規」ボタンでスクリプトを作成してください。", "保存エラー",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
 
-                await _scriptEngine.SaveToFileAsync(expandedFileName);
-                _recentFilesManager.AddFile(expandedFileName);
-                _currentScriptPath = expandedFileName;
-                txtStatus.Text = $"スクリプトを保存しました: {System.IO.Path.GetFileName(expandedFileName)}";
-            }
-            catch (Exception ex)
+        try
+        {
+            // 初回保存時: スクリプト名を確定
+            if (!_isScriptNamed)
             {
-                MessageBox.Show($"スクリプトの保存に失敗しました: {ex.Message}", "エラー",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-                txtStatus.Text = "スクリプトの保存に失敗しました";
+                string defaultName = Path.GetFileName(_currentScriptFolder ?? "新規スクリプト");
+                string? newFolderName = PromptForScriptName(defaultName);
+
+                if (string.IsNullOrWhiteSpace(newFolderName))
+                {
+                    txtStatus.Text = "保存がキャンセルされました";
+                    return;
+                }
+
+                // フォルダ名を変更
+                newFolderName = newFolderName.Trim();
+                string newFolderPath = Path.Combine(RPACore.ScriptPathManager.ScriptsDirectory, newFolderName);
+
+                // 同名フォルダが既に存在するかチェック
+                if (Directory.Exists(newFolderPath) && newFolderPath != _currentScriptFolder)
+                {
+                    MessageBox.Show($"「{newFolderName}」は既に存在します。別の名前を指定してください。",
+                        "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // フォルダをリネーム
+                if (_currentScriptFolder != null && _currentScriptFolder != newFolderPath)
+                {
+                    Directory.Move(_currentScriptFolder, newFolderPath);
+                    _currentScriptFolder = newFolderPath;
+                    _currentScriptPath = Path.Combine(_currentScriptFolder, "script.rpa.json");
+                }
+
+                _isScriptNamed = true;
             }
+
+            // スクリプトを保存
+            await _scriptEngine.SaveToFileAsync(_currentScriptPath!);
+            _recentFilesManager.AddFile(_currentScriptPath!);
+            txtStatus.Text = $"スクリプトを保存しました: {Path.GetFileName(_currentScriptFolder)}";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"スクリプトの保存に失敗しました: {ex.Message}", "エラー",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+            txtStatus.Text = "スクリプトの保存に失敗しました";
         }
     }
 
@@ -687,6 +753,86 @@ public partial class EditorPage : UserControl
     // Helper methods for dialog constructors
     private int GetActionCount() => _scriptEngine.Actions.Count;
     private IAction GetActionAt(int index) => _scriptEngine.Actions[index];
+
+    /// <summary>
+    /// スクリプト名入力ダイアログ（簡易版）
+    /// </summary>
+    private string? PromptForScriptName(string defaultName)
+    {
+        var dialog = new Window
+        {
+            Title = "スクリプト名の設定",
+            Width = 400,
+            Height = 180,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Owner = _ownerWindow,
+            ResizeMode = ResizeMode.NoResize
+        };
+
+        var mainStackPanel = new System.Windows.Controls.StackPanel();
+
+        // テキスト入力エリア
+        var inputPanel = new System.Windows.Controls.StackPanel { Margin = new Thickness(15) };
+        var label = new System.Windows.Controls.Label
+        {
+            Content = "スクリプト名を入力してください:",
+            FontSize = 13
+        };
+        var textBox = new System.Windows.Controls.TextBox
+        {
+            Text = defaultName,
+            Margin = new Thickness(0, 10, 0, 0),
+            Height = 25,
+            FontSize = 13
+        };
+
+        inputPanel.Children.Add(label);
+        inputPanel.Children.Add(textBox);
+        mainStackPanel.Children.Add(inputPanel);
+
+        // ボタンエリア
+        var buttonPanel = new System.Windows.Controls.StackPanel
+        {
+            Orientation = System.Windows.Controls.Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Margin = new Thickness(15, 10, 15, 15)
+        };
+
+        var okButton = new System.Windows.Controls.Button
+        {
+            Content = "OK",
+            Width = 80,
+            Height = 30,
+            Margin = new Thickness(5),
+            IsDefault = true
+        };
+        okButton.Click += (s, e) => { dialog.DialogResult = true; dialog.Close(); };
+
+        var cancelButton = new System.Windows.Controls.Button
+        {
+            Content = "キャンセル",
+            Width = 80,
+            Height = 30,
+            Margin = new Thickness(5),
+            IsCancel = true
+        };
+        cancelButton.Click += (s, e) => { dialog.DialogResult = false; dialog.Close(); };
+
+        buttonPanel.Children.Add(okButton);
+        buttonPanel.Children.Add(cancelButton);
+        mainStackPanel.Children.Add(buttonPanel);
+
+        dialog.Content = mainStackPanel;
+
+        // ダイアログ表示後にTextBoxにフォーカスと全選択
+        dialog.Loaded += (s, e) =>
+        {
+            textBox.Focus();
+            textBox.SelectAll();
+        };
+
+        return dialog.ShowDialog() == true ? textBox.Text : null;
+    }
 }
 
 /// <summary>
