@@ -11,14 +11,12 @@ public partial class ExcelRangeDialog : Window
 {
     public IAction? Action { get; private set; }
     private readonly ScriptEngine? _scriptEngine;
-    private readonly bool _isEditMode;
 
     // 新規作成用コンストラクタ
     public ExcelRangeDialog(ScriptEngine? scriptEngine = null)
     {
         InitializeComponent();
         _scriptEngine = scriptEngine;
-        _isEditMode = false;
 
         // イベントハンドラ登録
         rbRead.Checked += OperationType_Changed;
@@ -46,7 +44,6 @@ public partial class ExcelRangeDialog : Window
     public ExcelRangeDialog(ExcelReadRangeAction existingAction, ScriptEngine? scriptEngine = null)
         : this(scriptEngine)
     {
-        _isEditMode = true;
         rbRead.IsChecked = true;
 
         // 既存の値を復元
@@ -85,7 +82,6 @@ public partial class ExcelRangeDialog : Window
     public ExcelRangeDialog(ExcelWriteRangeAction existingAction, ScriptEngine? scriptEngine = null)
         : this(scriptEngine)
     {
-        _isEditMode = true;
         rbWrite.IsChecked = true;
 
         // 既存の値を復元

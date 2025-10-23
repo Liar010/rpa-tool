@@ -1,37 +1,125 @@
 <Window x:Class="RPAEditor.MouseActionDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="マウスクリック設定" Height="300" Width="400"
+        Title="マウスクリック設定" Height="550" Width="480"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="X座標:" Margin="0,5"/>
-        <TextBox x:Name="txtX" Grid.Row="0" Margin="60,5,0,5" Text="0"/>
+        <!-- クリック方法選択 -->
+        <GroupBox Grid.Row="0" Header="クリック方法" Margin="0,0,0,10">
+            <StackPanel>
+                <RadioButton x:Name="rbCoordinate" Content="座標指定" IsChecked="True" Margin="5"/>
+                <RadioButton x:Name="rbImageMatch" Content="画像認識" Margin="5"/>
+            </StackPanel>
+        </GroupBox>
 
-        <TextBlock Grid.Row="1" Text="Y座標:" Margin="0,5"/>
-        <TextBox x:Name="txtY" Grid.Row="1" Margin="60,5,0,5" Text="0"/>
+        <!-- スクロール可能なメインコンテンツ -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- クリック種類（共通） -->
+                <GroupBox Header="クリック種類" Margin="0,0,0,10">
+                    <ComboBox x:Name="cmbClickType" Height="25" Margin="5">
+                        <ComboBoxItem Content="左クリック" IsSelected="True"/>
+                        <ComboBoxItem Content="右クリック"/>
+                        <ComboBoxItem Content="ダブルクリック"/>
+                        <ComboBoxItem Content="中央クリック"/>
+                    </ComboBox>
+                </GroupBox>
 
-        <TextBlock Grid.Row="2" Text="クリック種類:" Margin="0,10,0,5"/>
-        <ComboBox x:Name="cmbClickType" Grid.Row="2" Margin="0,5" Height="25">
-            <ComboBoxItem Content="左クリック" IsSelected="True"/>
-            <ComboBoxItem Content="右クリック"/>
-            <ComboBoxItem Content="ダブルクリック"/>
-            <ComboBoxItem Content="中央クリック"/>
-        </ComboBox>
+                <!-- 座標指定モード -->
+                <GroupBox x:Name="grpCoordinate" Header="座標指定" Margin="0,0,0,10">
+                    <StackPanel Margin="5">
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="X座標:" Width="80" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtX" Width="150" Text="0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="Y座標:" Width="80" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtY" Width="150" Text="0"/>
+                        </StackPanel>
+                        <Button x:Name="btnGetMousePos" Content="マウス位置を取得 (3秒後)" Height="30" Margin="0,10"/>
+                    </StackPanel>
+                </GroupBox>
 
-        <TextBlock Grid.Row="3" Text="現在のマウス位置を取得" FontStyle="Italic" Foreground="Gray" Margin="0,10"/>
-        <Button x:Name="btnGetMousePos" Grid.Row="4" Content="マウス位置を取得 (3秒後)" Height="30" VerticalAlignment="Top" Margin="0,5"/>
+                <!-- 画像認識モード -->
+                <GroupBox x:Name="grpImageMatch" Header="画像認識設定" Margin="0,0,0,10" Visibility="Collapsed">
+                    <StackPanel Margin="5">
+                        <!-- テンプレート画像 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="テンプレート画像:" Width="120" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtTemplatePath" Width="200" IsReadOnly="True"/>
+                            <Button x:Name="btnSelectImage" Content="選択..." Width="60" Margin="5,0,0,0"/>
+                        </StackPanel>
+                        <Button x:Name="btnCaptureScreen" Content="📷 画面をキャプチャして保存" Height="30" Margin="0,5"/>
 
-        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                        <!-- 一致率 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,5">
+                            <TextBlock Text="一致率 (0.0～1.0):" Width="120" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtMatchThreshold" Width="100" Text="0.8"/>
+                            <TextBlock Text="※ 推奨: 0.7～0.9" Margin="10,0,0,0" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
+                        </StackPanel>
+
+                        <!-- タイムアウト -->
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="タイムアウト (ms):" Width="120" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtTimeout" Width="100" Text="5000"/>
+                            <TextBlock Text="※ 5000ms = 5秒" Margin="10,0,0,0" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
+                        </StackPanel>
+
+                        <!-- マルチスケールマッチング -->
+                        <CheckBox x:Name="chkMultiScale" Content="マルチスケールマッチング (DPI/解像度変更対応)" IsChecked="True" Margin="0,10,0,5"/>
+
+                        <!-- ウィンドウ指定（推奨） -->
+                        <TextBlock Text="検索対象ウィンドウ（推奨）" FontWeight="Bold" Margin="0,10,0,5"/>
+                        <RadioButton x:Name="rbWindowNone" Content="指定なし（全画面検索）" IsChecked="True" Margin="5,5,0,0"/>
+                        <RadioButton x:Name="rbWindowTitle" Content="ウィンドウタイトルで指定" Margin="5,5,0,0"/>
+                        <StackPanel x:Name="pnlWindowTitle" Margin="25,5,0,0" Visibility="Collapsed">
+                            <TextBox x:Name="txtWindowTitle" Width="300" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <RadioButton x:Name="rbWindowLaunchAction" Content="起動アクションで指定" Margin="5,5,0,0"/>
+                        <StackPanel x:Name="pnlLaunchAction" Margin="25,5,0,5" Visibility="Collapsed">
+                            <ComboBox x:Name="cmbLaunchActions" Width="300" HorizontalAlignment="Left"/>
+                        </StackPanel>
+
+                        <!-- 検索範囲（手動指定、上級者向け） -->
+                        <TextBlock Text="検索範囲の手動指定（上級者向け）" FontWeight="Bold" Margin="0,15,0,5"/>
+                        <TextBlock Text="※ウィンドウ指定と併用不可" FontSize="11" Foreground="Gray" Margin="0,0,0,5"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="X:" Width="30" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtSearchX" Width="60" Text="0"/>
+                            <TextBlock Text="Y:" Width="30" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtSearchY" Width="60" Text="0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="幅:" Width="30" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtSearchWidth" Width="60" Text="0"/>
+                            <TextBlock Text="高さ:" Width="30" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtSearchHeight" Width="60" Text="0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- 注意事項 -->
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="DarkBlue" Margin="0,5">
+                    <Run Text="【画像認識使用時の注意】" FontWeight="Bold"/>
+                    <LineBreak/>
+                    <Run Text="• 対象ウィンドウは最大化またはウィンドウサイズ固定を推奨"/>
+                    <LineBreak/>
+                    <Run Text="• マルチスケールマッチングでDPI/解像度変更に対応可能"/>
+                    <LineBreak/>
+                    <Run Text="• 見つからない場合は一致率を0.7程度に下げてください"/>
+                </TextBlock>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ボタン -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
             <Button x:Name="btnOK" Content="OK" Width="80" Height="30" Margin="5" IsDefault="True"/>
             <Button x:Name="btnCancel" Content="キャンセル" Width="80" Height="30" Margin="5" IsCancel="True"/>
         </StackPanel>

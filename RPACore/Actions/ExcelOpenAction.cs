@@ -19,14 +19,14 @@ public class ExcelOpenAction : ActionBase
         ? $"Excelファイルを開く: {FilePath} (存在しない場合は作成)"
         : $"Excelファイルを開く: {FilePath}";
 
-    public override async Task<bool> ExecuteAsync()
+    public override Task<bool> ExecuteAsync()
     {
         try
         {
             if (string.IsNullOrWhiteSpace(FilePath))
             {
                 LogError("ファイルパスが指定されていません");
-                return ContinueOnError;
+                return Task.FromResult(ContinueOnError);
             }
 
             string fullPath = Path.GetFullPath(FilePath);
@@ -61,26 +61,26 @@ public class ExcelOpenAction : ActionBase
             // コンテキストに保存
             Context?.OpenWorkbooks.Add(fullPath, workbook);
 
-            return true;
+            return Task.FromResult(true);
         }
         catch (FileNotFoundException ex)
         {
             LogError($"ファイルが見つかりません: {FilePath}");
             LogError($"詳細: {ex.Message}");
-            return ContinueOnError;
+            return Task.FromResult(ContinueOnError);
         }
         catch (IOException ex)
         {
             // ファイルロックエラー（他のプロセスで使用中）
             LogError($"ファイルが他のプロセスで使用中です。Excelで開いている場合は閉じてから実行してください: {FilePath}");
             LogError($"詳細: {ex.Message}");
-            return ContinueOnError;
+            return Task.FromResult(ContinueOnError);
         }
         catch (Exception ex)
         {
             LogError($"Excelファイルを開く際にエラーが発生しました: {ex.Message}");
             LogError($"エラー種類: {ex.GetType().Name}");
-            return ContinueOnError;
+            return Task.FromResult(ContinueOnError);
         }
     }
 }

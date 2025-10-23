@@ -5,7 +5,7 @@ namespace RPACore;
 /// <summary>
 /// Windows API 呼び出し用クラス
 /// </summary>
-internal static class NativeMethods
+internal static partial class NativeMethods
 {
     // マウス操作用
     [DllImport("user32.dll")]
@@ -76,6 +76,18 @@ internal static class NativeMethods
 
     [DllImport("user32.dll")]
     internal static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    internal static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct RECT
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
 
     // ウィンドウメッセージ
     internal const uint WM_CLOSE = 0x0010;

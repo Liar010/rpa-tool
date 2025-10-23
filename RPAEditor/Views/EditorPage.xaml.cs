@@ -17,6 +17,7 @@ public partial class EditorPage : UserControl
     private LogViewerWindow? _logViewerWindow;
     private Window? _ownerWindow;
     private readonly RecentFilesManager _recentFilesManager;
+    private string? _currentScriptPath;
 
     public EditorPage(ScriptEngine scriptEngine, Window ownerWindow)
     {
@@ -78,6 +79,7 @@ public partial class EditorPage : UserControl
         {
             await _scriptEngine.LoadFromFileAsync(filePath);
             _recentFilesManager.AddFile(filePath);
+            _currentScriptPath = filePath;
             UpdateActionList();
             txtStatus.Text = $"スクリプトを読み込みました: {System.IO.Path.GetFileName(filePath)}";
         }
@@ -91,7 +93,7 @@ public partial class EditorPage : UserControl
 
     private void BtnAddMouseClick_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new MouseActionDialog { Owner = _ownerWindow };
+        var dialog = new MouseActionDialog(_currentScriptPath, _scriptEngine) { Owner = _ownerWindow };
         if (dialog.ShowDialog() == true)
         {
             _scriptEngine.AddAction(dialog.Action);
@@ -304,7 +306,7 @@ public partial class EditorPage : UserControl
         switch (action)
         {
             case MouseAction mouseAction:
-                var mouseDialog = new MouseActionDialog(mouseAction) { Owner = _ownerWindow };
+                var mouseDialog = new MouseActionDialog(mouseAction, _currentScriptPath, _scriptEngine) { Owner = _ownerWindow };
                 result = mouseDialog.ShowDialog();
                 newAction = mouseDialog.Action;
                 break;
@@ -528,7 +530,19 @@ public partial class EditorPage : UserControl
 
         btnRunScript.IsEnabled = true;
         btnStopScript.IsEnabled = false;
-        txtStatus.Text = success ? "スクリプト実行完了" : "スクリプト実行中にエラーが発生しました";
+
+        if (success)
+        {
+            txtStatus.Text = "スクリプト実行完了";
+        }
+        else
+        {
+            // エラー概要を1行で表示
+            string errorSummary = string.IsNullOrEmpty(_scriptEngine.LastError)
+                ? "不明なエラー"
+                : _scriptEngine.LastError;
+            txtStatus.Text = $"スクリプト実行エラー: {errorSummary}";
+        }
     }
 
     private void BtnStopScript_Click(object sender, RoutedEventArgs e)
@@ -582,6 +596,7 @@ public partial class EditorPage : UserControl
 
                 await _scriptEngine.SaveToFileAsync(expandedFileName);
                 _recentFilesManager.AddFile(expandedFileName);
+                _currentScriptPath = expandedFileName;
                 txtStatus.Text = $"スクリプトを保存しました: {System.IO.Path.GetFileName(expandedFileName)}";
             }
             catch (Exception ex)
@@ -607,6 +622,7 @@ public partial class EditorPage : UserControl
             {
                 await _scriptEngine.LoadFromFileAsync(dialog.FileName);
                 _recentFilesManager.AddFile(dialog.FileName);
+                _currentScriptPath = dialog.FileName;
                 UpdateActionList();
                 txtStatus.Text = $"スクリプトを読み込みました: {System.IO.Path.GetFileName(dialog.FileName)}";
             }

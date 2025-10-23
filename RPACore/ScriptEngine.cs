@@ -74,6 +74,9 @@ public class ScriptEngine
     /// <summary>実行コンテキスト</summary>
     public ExecutionContext Context { get; } = new();
 
+    /// <summary>最後のエラーメッセージ（スクリプト実行失敗時の概要）</summary>
+    public string? LastError { get; private set; }
+
     public event EventHandler<ActionExecutedEventArgs>? ActionExecuted;
     public event EventHandler<ScriptCompletedEventArgs>? ScriptCompleted;
 
@@ -110,6 +113,7 @@ public class ScriptEngine
         Context.Clear(); // 実行コンテキストをクリア
         Context.ScriptEngine = this; // ScriptEngineへの参照を設定
         bool allSuccess = true;
+        LastError = null; // エラーメッセージをクリア
 
         try
         {
@@ -145,8 +149,14 @@ public class ScriptEngine
                 {
                     allSuccess = false;
 
+                    // 最初のエラーのみ記録
+                    if (LastError == null && action is ActionBase ab)
+                    {
+                        LastError = $"#{i + 1} {action.Name}: {ab.LastError ?? "不明なエラー"}";
+                    }
+
                     // ContinueOnErrorがfalseの場合は中断
-                    if (action is ActionBase ab && !ab.ContinueOnError)
+                    if (action is ActionBase ab2 && !ab2.ContinueOnError)
                     {
                         Console.WriteLine($"エラーが発生したため、スクリプトを中断します");
                         break;
@@ -224,9 +234,37 @@ public class ScriptEngine
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 
+        // 画像パスを相対パスに変換してから保存
+        string scriptDir = Path.GetDirectoryName(filePath) ?? Path.GetDirectoryName(Path.GetFullPath(filePath))!;
+        var actionsToSave = Actions.Select(action =>
+        {
+            // MouseActionの場合、画像パスを相対パスに変換
+            if (action is MouseAction mouseAction && mouseAction.Method == MouseAction.ClickMethod.ImageMatch)
+            {
+                var clonedAction = new MouseAction
+                {
+                    Method = mouseAction.Method,
+                    ClickType = mouseAction.ClickType,
+                    DelayAfterClick = mouseAction.DelayAfterClick,
+                    X = mouseAction.X,
+                    Y = mouseAction.Y,
+                    TemplateImagePath = ScriptPathManager.ToRelativePath(mouseAction.TemplateImagePath, scriptDir),
+                    MatchThreshold = mouseAction.MatchThreshold,
+                    SearchTimeoutMs = mouseAction.SearchTimeoutMs,
+                    UseMultiScale = mouseAction.UseMultiScale,
+                    SearchAreaX = mouseAction.SearchAreaX,
+                    SearchAreaY = mouseAction.SearchAreaY,
+                    SearchAreaWidth = mouseAction.SearchAreaWidth,
+                    SearchAreaHeight = mouseAction.SearchAreaHeight
+                };
+                return clonedAction;
+            }
+            return action;
+        }).ToList();
+
         var scriptData = new ScriptData
         {
-            Actions = Actions.Select(a => new ActionData
+            Actions = actionsToSave.Select(a => new ActionData
             {
                 Type = a.GetType().Name,
                 Data = JsonSerializer.Serialize(a, a.GetType(), serializerOptions)
@@ -292,6 +330,13 @@ public class ScriptEngine
 
             if (action != null)
             {
+                // MouseActionの場合、相対パスを絶対パスに変換
+                if (action is MouseAction mouseAction && mouseAction.Method == MouseAction.ClickMethod.ImageMatch)
+                {
+                    string scriptDir = Path.GetDirectoryName(filePath) ?? Path.GetDirectoryName(Path.GetFullPath(filePath))!;
+                    mouseAction.TemplateImagePath = ScriptPathManager.ToAbsolutePath(mouseAction.TemplateImagePath, scriptDir);
+                }
+
                 Actions.Add(action);
             }
         }
