@@ -66,13 +66,13 @@ public partial class ScreenCaptureDialog : Window
 
         _isSelecting = false;
 
-        // 選択範囲を取得
+        // 選択範囲を取得（WPF論理ピクセル）
         double x = Canvas.GetLeft(selectionRect);
         double y = Canvas.GetTop(selectionRect);
         double width = selectionRect.Width;
         double height = selectionRect.Height;
 
-        System.Diagnostics.Debug.WriteLine($"MouseUp: x={x}, y={y}, width={width}, height={height}");
+        System.Diagnostics.Debug.WriteLine($"MouseUp (logical): x={x}, y={y}, width={width}, height={height}");
 
         // 最小サイズチェック
         if (width < 10 || height < 10)
@@ -82,6 +82,24 @@ public partial class ScreenCaptureDialog : Window
             return;
         }
 
+        // DPIスケーリングを取得
+        var source = PresentationSource.FromVisual(this);
+        double dpiScaleX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+        double dpiScaleY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+
+        System.Diagnostics.Debug.WriteLine($"DPI Scale: X={dpiScaleX}, Y={dpiScaleY}");
+
+        // ウィンドウの位置を取得（物理ピクセル）
+        var windowPosition = this.PointToScreen(new System.Windows.Point(0, 0));
+
+        // Canvas上の座標を物理ピクセルに変換
+        int physicalX = (int)(windowPosition.X + x * dpiScaleX);
+        int physicalY = (int)(windowPosition.Y + y * dpiScaleY);
+        int physicalWidth = (int)(width * dpiScaleX);
+        int physicalHeight = (int)(height * dpiScaleY);
+
+        System.Diagnostics.Debug.WriteLine($"Physical pixels: x={physicalX}, y={physicalY}, width={physicalWidth}, height={physicalHeight}");
+
         // ウィンドウを非表示にしてキャプチャ
         Hide();
 
@@ -89,7 +107,7 @@ public partial class ScreenCaptureDialog : Window
         await Task.Delay(200);
 
         // CaptureAndSaveを実行（完了まで待機）
-        await CaptureAndSaveAsync((int)x, (int)y, (int)width, (int)height);
+        await CaptureAndSaveAsync(physicalX, physicalY, physicalWidth, physicalHeight);
     }
 
     private async Task CaptureAndSaveAsync(int x, int y, int width, int height)

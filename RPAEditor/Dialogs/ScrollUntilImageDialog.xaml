@@ -1,0 +1,141 @@
+<Window x:Class="RPAEditor.ScrollUntilImageDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="スクロール検索設定" Height="650" Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- スクロール方向選択 -->
+        <GroupBox Grid.Row="0" Header="スクロール方向" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal" Margin="5">
+                <RadioButton x:Name="rbDirectionDown" Content="下↓" IsChecked="True" Margin="5,0,15,0"/>
+                <RadioButton x:Name="rbDirectionUp" Content="上↑" Margin="0,0,15,0"/>
+                <RadioButton x:Name="rbDirectionRight" Content="右→" Margin="0,0,15,0"/>
+                <RadioButton x:Name="rbDirectionLeft" Content="左←" Margin="0,0,15,0"/>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- スクロール可能なメインコンテンツ -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- テンプレート画像 -->
+                <GroupBox Header="テンプレート画像" Margin="0,0,0,10">
+                    <StackPanel Margin="5">
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="画像ファイル:" Width="100" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtTemplatePath" Width="250" IsReadOnly="True"/>
+                            <Button x:Name="btnSelectImage" Content="選択..." Width="60" Margin="5,0,0,0"/>
+                        </StackPanel>
+                        <Button x:Name="btnCaptureScreen" Content="📷 画面をキャプチャして保存" Height="30" Margin="0,5"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- スクロール設定 -->
+                <GroupBox Header="スクロール設定" Margin="0,0,0,10">
+                    <StackPanel Margin="5">
+                        <!-- スクロール量 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="1回のスクロール量:" Width="140" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtScrollAmount" Width="80" Text="3"/>
+                            <TextBlock Text="※ ホイールクリック数" Margin="10,0,0,0" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
+                        </StackPanel>
+
+                        <!-- 最大スクロール回数 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="最大スクロール回数:" Width="140" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtMaxScrollCount" Width="80" Text="20"/>
+                            <TextBlock Text="※ 無限ループ防止" Margin="10,0,0,0" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
+                        </StackPanel>
+
+                        <!-- スクロール後待機時間 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="スクロール後待機 (ms):" Width="140" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtWaitAfterScroll" Width="80" Text="500"/>
+                            <TextBlock Text="※ 画面安定待ち" Margin="10,0,0,0" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- 画像認識設定 -->
+                <GroupBox Header="画像認識設定" Margin="0,0,0,10">
+                    <StackPanel Margin="5">
+                        <!-- 一致率 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="一致率 (0.0～1.0):" Width="120" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtMatchThreshold" Width="100" Text="0.8"/>
+                            <TextBlock Text="※ 推奨: 0.7～0.9" Margin="10,0,0,0" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
+                        </StackPanel>
+
+                        <!-- マルチスケールマッチング -->
+                        <CheckBox x:Name="chkMultiScale" Content="マルチスケールマッチング (DPI/解像度変更対応)" IsChecked="True" Margin="0,10,0,5"/>
+
+                        <!-- 発見時にクリック -->
+                        <CheckBox x:Name="chkClickWhenFound" Content="画像を発見したらクリックする" IsChecked="False" Margin="0,5,0,5"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- ウィンドウ指定 -->
+                <GroupBox Header="検索対象ウィンドウ（推奨）" Margin="0,0,0,10">
+                    <StackPanel Margin="5">
+                        <RadioButton x:Name="rbWindowNone" Content="指定なし（全画面検索）" IsChecked="True" Margin="0,5"/>
+                        <RadioButton x:Name="rbWindowTitle" Content="ウィンドウタイトルで指定" Margin="0,5"/>
+                        <StackPanel x:Name="pnlWindowTitle" Margin="20,5,0,0" Visibility="Collapsed">
+                            <TextBox x:Name="txtWindowTitle" Width="350" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <RadioButton x:Name="rbWindowLaunchAction" Content="起動アクションで指定" Margin="0,5"/>
+                        <StackPanel x:Name="pnlLaunchAction" Margin="20,5,0,5" Visibility="Collapsed">
+                            <ComboBox x:Name="cmbLaunchActions" Width="350" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- 検索範囲（手動指定） -->
+                <GroupBox Header="検索範囲の手動指定（上級者向け）" Margin="0,0,0,10">
+                    <StackPanel Margin="5">
+                        <TextBlock Text="※ウィンドウ指定と併用不可" FontSize="11" Foreground="Gray" Margin="0,0,0,5"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="X:" Width="30" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtSearchX" Width="60" Text="0"/>
+                            <TextBlock Text="Y:" Width="30" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtSearchY" Width="60" Text="0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="幅:" Width="30" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtSearchWidth" Width="60" Text="0"/>
+                            <TextBlock Text="高さ:" Width="30" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtSearchHeight" Width="60" Text="0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- 注意事項 -->
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="DarkBlue" Margin="0,5">
+                    <Run Text="【使用例】" FontWeight="Bold"/>
+                    <LineBreak/>
+                    <Run Text="• リスト内の特定項目を探す"/>
+                    <LineBreak/>
+                    <Run Text="• 長いページで「次へ」ボタンを探す"/>
+                    <LineBreak/>
+                    <Run Text="• テーブル内の特定行を探す"/>
+                    <LineBreak/>
+                    <LineBreak/>
+                    <Run Text="【注意】" FontWeight="Bold"/>
+                    <LineBreak/>
+                    <Run Text="• ウィンドウをアクティブにしてから実行してください"/>
+                </TextBlock>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ボタン -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button x:Name="btnOK" Content="OK" Width="80" Height="30" Margin="5" IsDefault="True"/>
+            <Button x:Name="btnCancel" Content="キャンセル" Width="80" Height="30" Margin="5" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

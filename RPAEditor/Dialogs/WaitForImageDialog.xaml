@@ -1,0 +1,124 @@
+<Window x:Class="RPAEditor.WaitForImageDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="画像待機設定" Height="600" Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 待機モード選択 -->
+        <GroupBox Grid.Row="0" Header="待機モード" Margin="0,0,0,10">
+            <StackPanel>
+                <RadioButton x:Name="rbModeAppear" Content="画像が出現するまで待機" IsChecked="True" Margin="5"/>
+                <RadioButton x:Name="rbModeDisappear" Content="画像が消失するまで待機" Margin="5"/>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- スクロール可能なメインコンテンツ -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- テンプレート画像 -->
+                <GroupBox Header="テンプレート画像" Margin="0,0,0,10">
+                    <StackPanel Margin="5">
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="画像ファイル:" Width="100" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtTemplatePath" Width="250" IsReadOnly="True"/>
+                            <Button x:Name="btnSelectImage" Content="選択..." Width="60" Margin="5,0,0,0"/>
+                        </StackPanel>
+                        <Button x:Name="btnCaptureScreen" Content="📷 画面をキャプチャして保存" Height="30" Margin="0,5"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- 待機設定 -->
+                <GroupBox Header="待機設定" Margin="0,0,0,10">
+                    <StackPanel Margin="5">
+                        <!-- タイムアウト -->
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="タイムアウト (ms):" Width="120" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtTimeout" Width="100" Text="30000"/>
+                            <TextBlock Text="※ 30秒" Margin="10,0,0,0" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
+                        </StackPanel>
+
+                        <!-- ポーリング間隔 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="ポーリング間隔 (ms):" Width="120" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtPollingInterval" Width="100" Text="500"/>
+                            <TextBlock Text="※ 0.5秒" Margin="10,0,0,0" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- 画像認識設定 -->
+                <GroupBox Header="画像認識設定" Margin="0,0,0,10">
+                    <StackPanel Margin="5">
+                        <!-- 一致率 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="一致率 (0.0～1.0):" Width="120" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtMatchThreshold" Width="100" Text="0.8"/>
+                            <TextBlock Text="※ 推奨: 0.7～0.9" Margin="10,0,0,0" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
+                        </StackPanel>
+
+                        <!-- マルチスケールマッチング -->
+                        <CheckBox x:Name="chkMultiScale" Content="マルチスケールマッチング (DPI/解像度変更対応)" IsChecked="True" Margin="0,10,0,5"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- ウィンドウ指定 -->
+                <GroupBox Header="検索対象ウィンドウ（推奨）" Margin="0,0,0,10">
+                    <StackPanel Margin="5">
+                        <RadioButton x:Name="rbWindowNone" Content="指定なし（全画面検索）" IsChecked="True" Margin="0,5"/>
+                        <RadioButton x:Name="rbWindowTitle" Content="ウィンドウタイトルで指定" Margin="0,5"/>
+                        <StackPanel x:Name="pnlWindowTitle" Margin="20,5,0,0" Visibility="Collapsed">
+                            <TextBox x:Name="txtWindowTitle" Width="350" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <RadioButton x:Name="rbWindowLaunchAction" Content="起動アクションで指定" Margin="0,5"/>
+                        <StackPanel x:Name="pnlLaunchAction" Margin="20,5,0,5" Visibility="Collapsed">
+                            <ComboBox x:Name="cmbLaunchActions" Width="350" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- 検索範囲（手動指定） -->
+                <GroupBox Header="検索範囲の手動指定（上級者向け）" Margin="0,0,0,10">
+                    <StackPanel Margin="5">
+                        <TextBlock Text="※ウィンドウ指定と併用不可" FontSize="11" Foreground="Gray" Margin="0,0,0,5"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="X:" Width="30" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtSearchX" Width="60" Text="0"/>
+                            <TextBlock Text="Y:" Width="30" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtSearchY" Width="60" Text="0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="幅:" Width="30" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtSearchWidth" Width="60" Text="0"/>
+                            <TextBlock Text="高さ:" Width="30" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtSearchHeight" Width="60" Text="0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- 注意事項 -->
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="DarkBlue" Margin="0,5">
+                    <Run Text="【使用例】" FontWeight="Bold"/>
+                    <LineBreak/>
+                    <Run Text="• ページ読み込み待ち: ローディング画像が消えるまで待機"/>
+                    <LineBreak/>
+                    <Run Text="• ボタン表示待ち: 「次へ」ボタンが表示されるまで待機"/>
+                    <LineBreak/>
+                    <Run Text="• 処理完了待ち: 「処理中」表示が消えるまで待機"/>
+                </TextBlock>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ボタン -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button x:Name="btnOK" Content="OK" Width="80" Height="30" Margin="5" IsDefault="True"/>
+            <Button x:Name="btnCancel" Content="キャンセル" Width="80" Height="30" Margin="5" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.Threading;
 
 namespace RPACore;
@@ -119,5 +120,28 @@ internal static class WindowHelper
         }, IntPtr.Zero);
 
         return foundWindow;
+    }
+
+    /// <summary>
+    /// ウィンドウの矩形領域を取得
+    /// </summary>
+    public static Rectangle GetWindowRectangle(IntPtr hWnd)
+    {
+        NativeMethods.GetWindowRect(hWnd, out NativeMethods.RECT rect);
+        return new Rectangle(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
+    }
+
+    /// <summary>
+    /// ウィンドウをアクティブ化
+    /// </summary>
+    public static void ActivateWindow(IntPtr hWnd)
+    {
+        // Altキーを押してフォーカス制限を回避
+        NativeMethods.keybd_event(NativeMethods.VK_MENU, 0, 0, UIntPtr.Zero);
+        NativeMethods.keybd_event(NativeMethods.VK_MENU, 0, NativeMethods.KEYEVENTF_KEYUP, UIntPtr.Zero);
+
+        // ウィンドウをアクティブ化
+        NativeMethods.SetForegroundWindow(hWnd);
+        NativeMethods.BringWindowToTop(hWnd);
     }
 }

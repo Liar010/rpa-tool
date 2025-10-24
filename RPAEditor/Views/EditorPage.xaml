@@ -89,6 +89,14 @@
                             </StackPanel>
                         </Expander>
 
+                        <!-- 画像認識カテゴリ -->
+                        <Expander Header="🔍 画像認識" IsExpanded="True" Margin="0,5">
+                            <StackPanel Margin="5,5,0,5">
+                                <Button x:Name="btnAddWaitForImage" Content="画像待機" Margin="0,3" Padding="5" Height="32"/>
+                                <Button x:Name="btnAddScrollUntilImage" Content="スクロール検索" Margin="0,3" Padding="5" Height="32"/>
+                            </StackPanel>
+                        </Expander>
+
                         <Separator Margin="0,10"/>
 
                         <!-- 編集機能 -->
