@@ -24,6 +24,7 @@ public partial class MainWindow : Window
         _homePage = new Views.HomePage();
         _homePage.NewScriptRequested += HomePage_NewScriptRequested;
         _homePage.ScriptFileSelected += HomePage_ScriptFileSelected;
+        _homePage.SchedulerRequested += HomePage_SchedulerRequested;
         _homePage.SettingsRequested += HomePage_SettingsRequested;
 
         contentMain.Content = _homePage;
@@ -64,6 +65,16 @@ public partial class MainWindow : Window
         // ホームページに戻る
         _homePage?.RefreshRecentScripts();
         ShowHomePage();
+    }
+
+    private void HomePage_SchedulerRequested(object? sender, System.EventArgs e)
+    {
+        // スケジューラウィンドウを開く（モードレス）
+        var schedulerWindow = new Windows.SchedulerWindow
+        {
+            Owner = this
+        };
+        schedulerWindow.Show();
     }
 
     private void HomePage_SettingsRequested(object? sender, System.EventArgs e)

@@ -8,6 +8,7 @@ namespace RPAEditor;
 
 public partial class LogViewerWindow : Window
 {
+    private const int MAX_LOGS = 1000; // 最大1000件
     private ObservableCollection<LogEntry> _allLogs = new();
 
     public LogViewerWindow()
@@ -29,8 +30,14 @@ public partial class LogViewerWindow : Window
         // UIスレッドで実行
         Dispatcher.Invoke(() =>
         {
-            // すべてのログに追加
+            // すべてのログに追加（サイクリック管理）
             _allLogs.Add(e.Entry);
+
+            // 上限を超えたら古いログを削除
+            while (_allLogs.Count > MAX_LOGS)
+            {
+                _allLogs.RemoveAt(0);
+            }
 
             // フィルタに合致すれば表示
             if (ShouldDisplay(e.Entry))

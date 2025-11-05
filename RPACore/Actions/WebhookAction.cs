@@ -27,7 +27,7 @@ public class WebhookAction : ActionBase
     public string WebhookUrl { get; set; } = string.Empty;
 
     /// <summary>サービス種類</summary>
-    public WebhookServiceType ServiceType { get; set; } = WebhookServiceType.Custom;
+    public WebhookServiceType ServiceType { get; set; } = WebhookServiceType.GoogleChat;
 
     /// <summary>送信メッセージ</summary>
     public string Message { get; set; } = string.Empty;

@@ -193,7 +193,22 @@ public class RecentFileInfo
     public DateTime LastAccessTime { get; set; }
     public long FileSize { get; set; }
 
-    public string DisplayName => FileName;
-    public string DisplayPath => FilePath;
+    // スクリプト名（親ディレクトリ名）を表示
+    public string DisplayName => Path.GetFileName(Path.GetDirectoryName(FilePath)) ?? FileName;
+
+    // Scripts フォルダからの相対パスを表示
+    public string DisplayPath
+    {
+        get
+        {
+            var scriptsIndex = FilePath.IndexOf("\\Scripts\\", StringComparison.OrdinalIgnoreCase);
+            if (scriptsIndex >= 0)
+            {
+                return FilePath.Substring(scriptsIndex + 1); // "Scripts\chat_notice\script.rpa.json"
+            }
+            return FilePath; // フォールバック（Scriptsフォルダ外の場合）
+        }
+    }
+
     public string DisplayTime => LastAccessTime.ToString("yyyy/MM/dd HH:mm");
 }

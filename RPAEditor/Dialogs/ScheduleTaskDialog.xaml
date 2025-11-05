@@ -1,0 +1,126 @@
+<Window x:Class="RPAEditor.Windows.ScheduleTaskDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="スケジュールタスク設定" Height="650" Width="550"
+        WindowStartupLocation="CenterOwner"
+        Background="White"
+        ResizeMode="NoResize">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- タスク名 -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+            <TextBlock Text="タスク名" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtTaskName" Height="30" FontSize="13"/>
+        </StackPanel>
+
+        <!-- スクリプトファイル -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,15">
+            <TextBlock Text="スクリプトファイル" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <ComboBox x:Name="cmbScriptPath" Grid.Column="0" Height="30" FontSize="13" IsEditable="False">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DisplayName}" ToolTip="{Binding FullPath}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Button x:Name="btnBrowseScript" Grid.Column="1" Content="参照..." Width="80" Height="30" Margin="10,0,0,0"/>
+            </Grid>
+        </StackPanel>
+
+        <!-- スケジュール種類 -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,15">
+            <TextBlock Text="スケジュール種類" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <StackPanel>
+                <RadioButton x:Name="rbDaily" Content="毎日（固定時刻）" GroupName="ScheduleType" Margin="0,5,0,5"/>
+                <RadioButton x:Name="rbWeekly" Content="毎週（曜日指定）" GroupName="ScheduleType" Margin="0,0,0,5"/>
+                <RadioButton x:Name="rbInterval" Content="定期実行（分単位）" GroupName="ScheduleType" Margin="0,0,0,5"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- スケジュール詳細設定 -->
+        <Border Grid.Row="3" BorderBrush="#DDDDDD" BorderThickness="1" Padding="15" Background="#FAFAFA">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <!-- 毎日 -->
+                    <StackPanel x:Name="pnlDaily" Visibility="Collapsed">
+                        <TextBlock Text="実行時刻" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox x:Name="txtDailyHour" Width="50" Height="30" MaxLength="2" Text="09"/>
+                            <TextBlock Text=":" FontSize="16" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                            <TextBox x:Name="txtDailyMinute" Width="50" Height="30" MaxLength="2" Text="00"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- 毎週 -->
+                    <StackPanel x:Name="pnlWeekly" Visibility="Collapsed">
+                        <TextBlock Text="実行する曜日" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <WrapPanel>
+                            <CheckBox x:Name="chkSunday" Content="日" Margin="0,5,15,5" Width="50"/>
+                            <CheckBox x:Name="chkMonday" Content="月" Margin="0,5,15,5" Width="50"/>
+                            <CheckBox x:Name="chkTuesday" Content="火" Margin="0,5,15,5" Width="50"/>
+                            <CheckBox x:Name="chkWednesday" Content="水" Margin="0,5,15,5" Width="50"/>
+                            <CheckBox x:Name="chkThursday" Content="木" Margin="0,5,15,5" Width="50"/>
+                            <CheckBox x:Name="chkFriday" Content="金" Margin="0,5,15,5" Width="50"/>
+                            <CheckBox x:Name="chkSaturday" Content="土" Margin="0,5,15,5" Width="50"/>
+                        </WrapPanel>
+                        <TextBlock Text="実行時刻" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox x:Name="txtWeeklyHour" Width="50" Height="30" MaxLength="2" Text="09"/>
+                            <TextBlock Text=":" FontSize="16" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                            <TextBox x:Name="txtWeeklyMinute" Width="50" Height="30" MaxLength="2" Text="00"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- 定期実行 -->
+                    <StackPanel x:Name="pnlInterval" Visibility="Collapsed">
+                        <TextBlock Text="実行間隔（分）" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtIntervalMinutes" Width="100" Height="30" Text="30" HorizontalAlignment="Left"/>
+                        <TextBlock Text="（例: 30分ごとに実行）" FontSize="11" Foreground="#666666" Margin="0,5,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- 通知設定 -->
+        <Border Grid.Row="4" BorderBrush="#DDDDDD" BorderThickness="1" Padding="15" Background="#F0F8FF" Margin="0,15,0,0">
+            <StackPanel>
+                <CheckBox x:Name="chkNotifyOnCompletion" Content="実行完了時に通知する" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+                <StackPanel x:Name="pnlNotificationSettings" Visibility="Collapsed">
+                    <TextBlock Text="通知タイミング:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <StackPanel Margin="10,0,0,0">
+                        <RadioButton x:Name="rbNotifyOnError" Content="失敗時のみ（推奨）" GroupName="NotifyPolicy" Margin="0,3,0,3" IsChecked="True"/>
+                        <RadioButton x:Name="rbNotifyOnSuccess" Content="成功時のみ" GroupName="NotifyPolicy" Margin="0,3,0,3"/>
+                        <RadioButton x:Name="rbNotifyAlways" Content="常に通知（成功・失敗両方）" GroupName="NotifyPolicy" Margin="0,3,0,3"/>
+                    </StackPanel>
+
+                    <TextBlock Text="通知間隔（分）:" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                    <TextBox x:Name="txtNotifyIntervalMinutes" Width="100" Height="28" Text="5" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                    <TextBlock Text="※連続通知を抑制します（レート制限対策）" FontSize="11" Foreground="#666666" Margin="10,3,0,0"/>
+
+                    <TextBlock Text="WebhookURL（省略時は設定画面のURLを使用）:" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                    <TextBox x:Name="txtNotifyWebhookUrl" Height="28" FontSize="12" Margin="10,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- ボタン -->
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+            <Button x:Name="btnOK" Content="OK" Width="100" Height="35" Margin="0,0,10,0" IsDefault="True"/>
+            <Button x:Name="btnCancel" Content="キャンセル" Width="100" Height="35" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -715,7 +715,8 @@ public partial class EditorPage : UserControl
         var dialog = new OpenFileDialog
         {
             Filter = "RPA Script (*.rpa.json)|*.rpa.json|All Files (*.*)|*.*",
-            DefaultExt = ".rpa.json"
+            DefaultExt = ".rpa.json",
+            InitialDirectory = ScriptPathManager.ScriptsDirectory
         };
 
         if (dialog.ShowDialog() == true)
@@ -725,6 +726,11 @@ public partial class EditorPage : UserControl
                 await _scriptEngine.LoadFromFileAsync(dialog.FileName);
                 _recentFilesManager.AddFile(dialog.FileName);
                 _currentScriptPath = dialog.FileName;
+
+                // スクリプトフォルダを設定（既存スクリプトは名前確定済み）
+                _currentScriptFolder = Path.GetDirectoryName(dialog.FileName);
+                _isScriptNamed = true;
+
                 UpdateActionList();
                 txtStatus.Text = $"スクリプトを読み込みました: {System.IO.Path.GetFileName(dialog.FileName)}";
             }
